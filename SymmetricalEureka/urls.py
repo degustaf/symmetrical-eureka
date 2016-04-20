@@ -7,8 +7,8 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Example:
-    (r'^$', 'django_sample.plus.views.index'),
-    (r'^oauth2callback', 'django_sample.plus.views.auth_return'),
+    (r'^$', 'SymmetricalEureka.plus.views.index'),
+    (r'^oauth2callback', 'SymmetricalEureka.plus.views.auth_return'),
 
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
