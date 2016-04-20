@@ -5,10 +5,9 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
-    # Example:
-    (r'^$', 'SymmetricalEureka.plus.views.index'),
-    (r'^oauth2callback', 'SymmetricalEureka.plus.views.auth_return'),
+urlpatterns = patterns('',  # Example:
+    (r'^$', 'SymmetricalEureka.views.index'),
+    (r'^oauth2callback', 'SymmetricalEureka.views.auth_return'),
 
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
@@ -17,9 +16,8 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     (r'^accounts/login/$', 'django.contrib.auth.views.login',
-                        {'template_name': 'plus/login.html'}),
+     {'template_name': 'plus/login.html'}),
 
     (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': os.path.join(os.path.dirname(__file__), 'static')
-}),
+        {'document_root': os.path.join(os.path.dirname(__file__), 'static')}),
 )
