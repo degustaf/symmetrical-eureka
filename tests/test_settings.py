@@ -22,8 +22,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'django_sample.plus',
-    'SymmetricalEurekas',
+    'SymmetricalEureka',
     'tests',
 )
 

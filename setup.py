@@ -26,6 +26,7 @@ CLASSIFIERS = [
 INSTALL_REQUIREMENTS = [
     'Django>=1.8,<1.10',
     'oauth2client>=2.0',
+    'google-api-python-client>=1.5',
     ]
 
 setup(

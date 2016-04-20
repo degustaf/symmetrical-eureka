@@ -9,8 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from .plus.models import CredentialsModel
-from . import settings
+from django.conf import settings
+from .models import CredentialsModel
 from oauth2client.contrib import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.contrib.django_orm import Storage
