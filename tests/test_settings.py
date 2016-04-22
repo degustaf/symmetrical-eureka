@@ -14,7 +14,7 @@ DATABASES = {
 
 SECRET_KEY = 'fake-key'
 
-ROOT_URLCONF = 'SymmetricalEurekas.urls'
+ROOT_URLCONF = 'SymmetricalEureka.urls'
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -25,6 +25,8 @@ INSTALLED_APPS = (
     'SymmetricalEureka',
     'tests',
 )
+
+CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'test_secrets.json')
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '/home/degustaf/madlibs/static'

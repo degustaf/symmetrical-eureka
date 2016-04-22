@@ -1,1 +1,1 @@
-default_app_config = 'SymmetricalEureka.apps.SymmetricalEurekaConfig'
+# default_app_config = 'SymmetricalEureka.apps.SymmetricalEurekaConfig'
