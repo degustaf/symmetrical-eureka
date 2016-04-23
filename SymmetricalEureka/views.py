@@ -49,6 +49,7 @@ def index(request):
         http = httplib2.Http()
         http = credential.authorize(http)
         service = build("plus", "v1", http=http)
+        # pylint: disable=no-member
         activities = service.activities()
         activitylist = activities.list(collection='public',
                                        userId='me').execute()
