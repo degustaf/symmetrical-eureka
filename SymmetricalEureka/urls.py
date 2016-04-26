@@ -3,6 +3,7 @@ SymmetricalEureka URL Configuration
 """
 # import os
 from django.conf.urls import url
+from django.contrib.auth.views import login
 from SymmetricalEureka import views
 # from . import views
 
@@ -14,6 +15,7 @@ from SymmetricalEureka import views
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^oauth2callback', views.auth_return, name='auth_return'),
+    url(r'^accounts/login/$', login),
 
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
