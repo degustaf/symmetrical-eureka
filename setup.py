@@ -18,15 +18,16 @@ CLASSIFIERS = [
     'License :: OSI Approved :: MIT',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ]
 
 INSTALL_REQUIREMENTS = [
     'Django>=1.8,<1.10',
-    'oauth2client>=2.0',
-    'google-api-python-client>=1.5',
+    'python-social-auth>=0.2',
     ]
 
 setup(
