@@ -19,6 +19,6 @@ class IndexPageTest(TestCase):
         """
         Test that home page responds.
         """
-        response = self.client.get(reverse('home'))
+        response = self.client.get(reverse('SE_home'))
         # pylint: disable=no-member
         self.assertEqual(response.status_code, 200)

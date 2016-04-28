@@ -21,7 +21,7 @@ class UrlTest(TestCase):
         """
         Test that index resolves.
         """
-        found = resolve(reverse('home'))
+        found = resolve(reverse('SE_home'))
         self.assertEqual(found.func, views.home)
 
     def test_social_urls_resolve(self):

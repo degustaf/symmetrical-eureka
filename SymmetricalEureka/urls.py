@@ -12,7 +12,7 @@ admin.autodiscover()
 
 # pylint: disable=invalid-name
 urlpatterns = [
-    url(r'^$', views.home, name='home'),
+    url(r'^$', views.home, name='SE_home'),
     url('', include(social_urls, namespace='social')),
     url('', include(auth_urls, namespace='auth')),
 ]

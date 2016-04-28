@@ -1,12 +1,50 @@
 <!DOCTYPE html>
+{% load bootstrap3 %}
 <html lang="en">
  <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Third-party Authentication Tutorial{% endblock %}</title>
+    <title>{% block title %}SymmetricalEureka{% endblock %}</title>
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery=True %}
  </head>
+
  <body>
+
+    {% block navbar %}
+      <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span> 
+            </button>
+            <a class="navbar-brand" href="{% url 'SE_home' %}">SymmetricalEureka</a>
+          </div>
+          <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#">Page 1</a></li>
+              <li><a href="#">Page 2</a></li> 
+              <li><a href="#">Page 3</a></li> 
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              {% if user and not user.is_anonymous %}
+                <li><a>Hello {{ user.get_full_name|default:user.username }}!</a></li>
+                <li><a href="{% url 'auth:logout' %}?next={{ request.path }}">
+                  <span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+              {% else %}
+                <li><a href="#">Login or Sign Up</a></li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </nav>
+    {% endblock %}
+
     {% block main %}{% endblock %}
+
  </body>
 </html>

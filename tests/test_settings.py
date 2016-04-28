@@ -23,6 +23,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'SymmetricalEureka',
     'social.apps.django_app.default',
+    'bootstrap3',
     'tests',
 )
 
