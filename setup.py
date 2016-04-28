@@ -14,6 +14,9 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 CLASSIFIERS = [
     'Environment :: Web Environment',
     'Framework :: Django',
+    'Framework :: Django :: 1.7',
+    'Framework :: Django :: 1.8',
+    'Framework :: Django :: 1.9',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT',
     'Operating System :: OS Independent',

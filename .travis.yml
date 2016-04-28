@@ -1,4 +1,5 @@
 language: python
+python: 3.4
 
 before_script:
 - pip install tox
@@ -8,21 +9,22 @@ script:  tox
 
 matrix:
   include:
-    - python: 2.7
-      env: TOXENV=py27
-    - python: 3.4
-      env: TOXENV=py34
-    - python: 3.5
-      env: TOXENV=py35
-    - python: pypy
-      env: TOXENV=pypy
-    - python: 3.5
+      env: TOXENV=py27-17
+      env: TOXENV=py27-18
+      env: TOXENV=py27-19
+      env: TOXENV=py34-17
+      env: TOXENV=py34-18
+      env: TOXENV=py34-19
+      env: TOXENV=py35-17
+      env: TOXENV=py35-18
+      env: TOXENV=py35-19
+      env: TOXENV=pypy-17
+      env: TOXENV=pypy-18
+      env: TOXENV=pypy-19
       env: TOXENV=lint
-    - python: 3.5
       env: TOXENV=coverage
   fast_finish: true
   allow_failures:
-    - python: 3.5
       env: TOXENV=lint
 
 sudo: false
