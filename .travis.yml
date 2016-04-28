@@ -38,11 +38,11 @@ matrix:
       env: TOXENV=pydev-django18
     - python: 3.5-dev
       env: TOXENV=pydev-django19
-    - python: 3.5-nightly
+    - python: nightly
       env: TOXENV=pyovernight-django17
-    - python: 3.5-nightly
+    - python: nightly
       env: TOXENV=pyovernight-django18
-    - python: 3.5-nightly
+    - python: nightly
       env: TOXENV=pyovernight-django19
     - python: 3.5
       env: TOXENV=lint
