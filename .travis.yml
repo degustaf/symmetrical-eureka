@@ -9,15 +9,11 @@ script:  tox
 matrix:
   include:
     - python: 2.7
-      env: TOXENV=py27-django17
-    - python: 2.7
       env: TOXENV=py27-django18
     - python: 2.7
       env: TOXENV=py27-django19
     - python: 2.7
       env: TOXENV=py27-djangodev
-    - python: 3.4
-      env: TOXENV=py34-django17
     - python: 3.4
       env: TOXENV=py34-django18
     - python: 3.4
@@ -25,15 +21,11 @@ matrix:
     - python: 3.4
       env: TOXENV=py34-djangodev
     - python: 3.5
-      env: TOXENV=py35-django17
-    - python: 3.5
       env: TOXENV=py35-django18
     - python: 3.5
       env: TOXENV=py35-django19
     - python: 3.5
       env: TOXENV=py35-djangodev
-    - python: pypy
-      env: TOXENV=pypy-django17
     - python: pypy
       env: TOXENV=pypy-django18
     - python: pypy
@@ -41,15 +33,11 @@ matrix:
     - python: pypy
       env: TOXENV=pypy-djangodev
     - python: 3.5-dev
-      env: TOXENV=pydev-django17
-    - python: 3.5-dev
       env: TOXENV=pydev-django18
     - python: 3.5-dev
       env: TOXENV=pydev-django19
     - python: 3.5-dev
       env: TOXENV=pydev-djangodev
-    - python: nightly
-      env: TOXENV=pyovernight-django17
     - python: nightly
       env: TOXENV=pyovernight-django18
     - python: nightly

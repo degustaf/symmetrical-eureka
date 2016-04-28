@@ -14,7 +14,6 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 CLASSIFIERS = [
     'Environment :: Web Environment',
     'Framework :: Django',
-    'Framework :: Django :: 1.7',
     'Framework :: Django :: 1.8',
     'Framework :: Django :: 1.9',
     'Intended Audience :: Developers',
@@ -29,7 +28,7 @@ CLASSIFIERS = [
     ]
 
 INSTALL_REQUIREMENTS = [
-    'Django>=1.7,<1.10',
+    'Django>=1.8,<1.10',
     'python-social-auth>=0.2',
     'django-bootstrap3>=7.0'
     ]
