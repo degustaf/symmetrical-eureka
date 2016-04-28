@@ -9,29 +9,41 @@ script:  tox
 matrix:
   include:
     - python: 2.7
-      env: TOXENV=py27-17
+      env: TOXENV=py27-django17
     - python: 2.7
-      env: TOXENV=py27-18
+      env: TOXENV=py27-django18
     - python: 2.7
-      env: TOXENV=py27-19
+      env: TOXENV=py27-django19
     - python: 3.4
-      env: TOXENV=py34-17
+      env: TOXENV=py34-django17
     - python: 3.4
-      env: TOXENV=py34-18
+      env: TOXENV=py34-django18
     - python: 3.4
-      env: TOXENV=py34-19
+      env: TOXENV=py34-django19
     - python: 3.5
-      env: TOXENV=py35-17
+      env: TOXENV=py35-django17
     - python: 3.5
-      env: TOXENV=py35-18
+      env: TOXENV=py35-django18
     - python: 3.5
-      env: TOXENV=py35-19
+      env: TOXENV=py35-django19
     - python: pypy
-      env: TOXENV=pypy-17
+      env: TOXENV=pypy-django17
     - python: pypy
-      env: TOXENV=pypy-18
+      env: TOXENV=pypy-django18
     - python: pypy
-      env: TOXENV=pypy-19
+      env: TOXENV=pypy-django19
+    - python: 3.5-dev
+      env: TOXENV=pydev-django17
+    - python: 3.5-dev
+      env: TOXENV=pydev-django18
+    - python: 3.5-dev
+      env: TOXENV=pydev-django19
+    - python: 3.5-nightly
+      env: TOXENV=pyovernight-django17
+    - python: 3.5-nightly
+      env: TOXENV=pyovernight-django18
+    - python: 3.5-nightly
+      env: TOXENV=pyovernight-django19
     - python: 3.5
       env: TOXENV=lint
     - python: 3.5
