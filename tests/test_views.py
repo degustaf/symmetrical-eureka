@@ -23,6 +23,20 @@ class IndexPageTest(TestCase):
         # pylint: disable=no-member
         self.assertEqual(response.status_code, 200)
 
+    def test_home_responds_logged_in(self):
+        """
+        Test that home page responds.
+        """
+        test_user = User.objects.create_user("Bob", password="password")
+        try:
+            self.client.force_login(test_user)
+        except AttributeError:
+            # For Django 1.8
+            self.client.login(username="Bob", password="password")
+        response = self.client.get(reverse('SE_home'))
+        # pylint: disable=no-member
+        self.assertEqual(response.status_code, 200)
+
 
 class LoginPageTest(TestCase):
     """
