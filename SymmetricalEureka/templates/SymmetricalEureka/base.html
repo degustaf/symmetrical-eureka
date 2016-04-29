@@ -36,7 +36,7 @@
                 <li><a href="{% url 'auth:logout' %}?next={{ request.path }}">
                   <span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
               {% else %}
-                <li><a href="#">Login or Sign Up</a></li>
+              <li><a href="{% url 'SE_login' %}">Login or Sign Up</a></li>
               {% endif %}
             </ul>
           </div>

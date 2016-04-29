@@ -3,7 +3,7 @@ Views for SymmetricalEureka
 """
 
 
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 
 
@@ -15,3 +15,12 @@ def home(request):
                                        'user': request.user})
     return render_to_response('SymmetricalEureka/home.html',
                               context_instance=context)
+
+
+def login(request):
+    """
+    View for the login page.
+    """
+    if request.user.is_authenticated():
+        return redirect('SE_home')
+    return render_to_response('SymmetricalEureka/login.html')
