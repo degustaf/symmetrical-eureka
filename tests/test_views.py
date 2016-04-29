@@ -50,3 +50,11 @@ class LoginPageTest(TestCase):
         response = self.client.get(reverse('SE_login'))
         # pylint: disable=no-member
         self.assertRedirects(response, reverse('SE_home'))
+
+    def test_logins_redirect_to_home(self):
+        """
+        Test that login links tell Oauth providers to redirect back to the home
+        page.
+        """
+        response = self.client.get(reverse('SE_login'))
+        self.assertContains(response, "?next={}".format(reverse('SE_home')))

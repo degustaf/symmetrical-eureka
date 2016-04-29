@@ -3,6 +3,7 @@ Views for SymmetricalEureka
 """
 
 
+from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render_to_response, redirect
 from django.template.context import RequestContext
 
@@ -23,4 +24,8 @@ def login(request):
     """
     if request.user.is_authenticated():
         return redirect('SE_home')
-    return render_to_response('SymmetricalEureka/login.html')
+    # return render_to_response('SymmetricalEureka/login.html')
+
+    context = RequestContext(request, {'next_path': reverse_lazy('SE_home')})
+    return render_to_response('SymmetricalEureka/login.html',
+                              context_instance=context)
