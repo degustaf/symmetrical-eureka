@@ -41,8 +41,12 @@ class LoginPageTest(TestCase):
         """
         Test that login page redirects if already logged in.
         """
-        test_user = User.objects.create_user("Bob")
-        self.client.force_login(test_user)
+        test_user = User.objects.create_user("Bob", password="password")
+        try:
+            self.client.force_login(test_user)
+        except AttributeError:
+            # For Django 1.8
+            self.client.login(username="Bob", password="password")
         response = self.client.get(reverse('SE_login'))
         # pylint: disable=no-member
         self.assertRedirects(response, reverse('SE_home'))
