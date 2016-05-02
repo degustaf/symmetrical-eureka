@@ -2,3 +2,6 @@
 include =
     SymmetricalEureka/*.py
     SymmetricalEureka/**/*.py
+
+omit =
+    SymmetricalEureka/migrations/*.py

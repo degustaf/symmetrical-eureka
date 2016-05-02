@@ -19,7 +19,7 @@ def home(request):
     character_list = None
     if request.user.is_authenticated():
         character_list = Character.objects.filter(
-            player=request.user).order_by('Name')
+            player=request.user).order_by('character_name')
     context = RequestContext(request, {'request': request,
                                        'user': request.user,
                                        'character_list': character_list})
@@ -48,7 +48,7 @@ def display_character(request, character_uuid):
     player_character = Character.objects.get(Char_uuid=character_uuid)
     if player_character.player.id == request.user.id:
         character_list = Character.objects.filter(
-            player=request.user).order_by('Name')
+            player=request.user).order_by('character_name')
         context = RequestContext(request,
                                  {'request': request,
                                   'user': request.user,
@@ -69,4 +69,7 @@ def new_character(request):
     if request.method == 'GET':
         return render_to_response('SymmetricalEureka/new_character.html')
     if request.method == 'POST':
-        return HttpResponse("")
+        char = Character(player=request.user, **request.POST)
+        # pylint: disable=no-member
+        char.save()
+        return redirect('SE_character', character_uuid=str(char.Char_uuid))

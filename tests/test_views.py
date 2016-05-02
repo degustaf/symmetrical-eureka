@@ -5,6 +5,7 @@ Classes to test views code.
 from django.contrib.auth.models import User
 # from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.test import TestCase
 
 from SymmetricalEureka import models  # , views
@@ -84,7 +85,8 @@ class CharacterPageTests(TestCase):
         Test that character page responds.
         """
         test_user = User.objects.create_user("Mike", password="password")
-        test_character = models.Character(player=test_user, Name="Zeke")
+        test_character = models.Character(player=test_user,
+                                          character_name="Zeke")
         # pylint: disable=no-member
         test_character.save()
         try:
@@ -97,6 +99,27 @@ class CharacterPageTests(TestCase):
                                    test_character.Char_uuid})
         response = self.client.get(test_url)
         self.assertEqual(response.status_code, 200)
+
+    def test_cant_access_others_char(self):
+        """
+        Test that a user can't access another user's character.
+        """
+        test_user = User.objects.create_user("Mike", password="password")
+        second_user = User.objects.create_user("Tim", password="password")
+        test_character = models.Character(player=test_user,
+                                          character_name="Zeke")
+        # pylint: disable=no-member
+        test_character.save()
+        try:
+            self.client.force_login(second_user)
+        except AttributeError:
+            # For Django 1.8
+            self.client.login(username="Tim", password="password")
+        test_url = reverse('SE_character',
+                           kwargs={'character_uuid':
+                                   test_character.Char_uuid})
+        response = self.client.get(test_url)
+        self.assertEqual(response.status_code, 401)
 
 
 class NewCharacterPageTests(TestCase):
@@ -136,5 +159,6 @@ class NewCharacterPageTests(TestCase):
             # For Django 1.8
             self.client.login(username="Mike", password="password")
         response = self.client.post(reverse('new_character'),
-                                    {"character_name": 'Hrothgar'})
+                                    {'character_name': 'Hrothgar'})
         # self.assertEqual(response.status, 302)
+        self.assertIsInstance(response, HttpResponseRedirect)

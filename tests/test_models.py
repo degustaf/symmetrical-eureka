@@ -18,5 +18,6 @@ class CharacterTest(TestCase):
         Test ability to create Character
         """
         test_user = User.objects.create_user("Mike", password="password")
-        test_character = models.Character(player=test_user, Name="Zeke")
-        self.assertEqual(test_character.Name, "Zeke")
+        test_character = models.Character(player=test_user,
+                                          character_name="Zeke")
+        self.assertEqual(test_character.character_name, "Zeke")
