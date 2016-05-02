@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-# from SymmetricalEureka import models, views
+from SymmetricalEureka import models  # , views
 
 
 class IndexPageTest(TestCase):
@@ -72,3 +72,69 @@ class LoginPageTest(TestCase):
         """
         response = self.client.get(reverse('SE_login'))
         self.assertContains(response, "?next={}".format(reverse('SE_home')))
+
+
+class CharacterPageTests(TestCase):
+    """
+    Class of tests for the Character page.
+    """
+
+    def test_character_responds(self):
+        """
+        Test that character page responds.
+        """
+        test_user = User.objects.create_user("Mike", password="password")
+        test_character = models.Character(player=test_user, Name="Zeke")
+        # pylint: disable=no-member
+        test_character.save()
+        try:
+            self.client.force_login(test_user)
+        except AttributeError:
+            # For Django 1.8
+            self.client.login(username="Mike", password="password")
+        test_url = reverse('SE_character',
+                           kwargs={'character_uuid':
+                                   test_character.Char_uuid})
+        response = self.client.get(test_url)
+        self.assertEqual(response.status_code, 200)
+
+
+class NewCharacterPageTests(TestCase):
+    """
+    Class of tests for the New Character page.
+    """
+
+    def test_new_character_responds(self):
+        """
+        Test that new character page responds.
+        """
+        response = self.client.get(reverse('new_character'))
+        self.assertRedirects(response, reverse('SE_login') + '?next=' +
+                             reverse('new_character'))
+
+    def test_new_character_loggedin(self):
+        """
+        Test that new character page responds when logged in.
+        """
+        test_user = User.objects.create_user("Mike", password="password")
+        try:
+            self.client.force_login(test_user)
+        except AttributeError:
+            # For Django 1.8
+            self.client.login(username="Mike", password="password")
+        response = self.client.get(reverse('new_character'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_new_character_created(self):
+        """
+        Test that new character gets created.
+        """
+        test_user = User.objects.create_user("Mike", password="password")
+        try:
+            self.client.force_login(test_user)
+        except AttributeError:
+            # For Django 1.8
+            self.client.login(username="Mike", password="password")
+        response = self.client.post(reverse('new_character'),
+                                    {"character_name": 'Hrothgar'})
+        # self.assertEqual(response.status, 302)

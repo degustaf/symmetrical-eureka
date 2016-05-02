@@ -60,6 +60,7 @@ MIDDLEWARE_CLASSES = (
 STATIC_URL = '/static/'
 STATIC_ROOT = '/home/degustaf/madlibs/static'
 
+LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 
 # Social Auth Keys

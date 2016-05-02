@@ -2,6 +2,8 @@
 Classes to test urls code.
 """
 
+from uuid import uuid4
+
 # from django.contrib.auth.models import User
 # from django.contrib.auth.views import login
 from django.core.urlresolvers import resolve, reverse
@@ -37,3 +39,18 @@ class UrlTest(TestCase):
         """
         found = resolve(reverse('auth:logout'))
         self.assertEqual(found.func, auth_views.logout)
+
+    def test_character_urls_resolve(self):
+        """
+        Test that Character urls are included.
+        """
+        found = resolve(reverse('SE_character',
+                                kwargs={'character_uuid': uuid4()}))
+        self.assertEqual(found.func, views.display_character)
+
+    def test_new_character_url_resolves(self):
+        """
+        Test that new character url resolves.
+        """
+        found = resolve(reverse('new_character'))
+        self.assertEqual(found.func, views.new_character)

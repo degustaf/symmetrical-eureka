@@ -14,6 +14,9 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^$', views.home, name='SE_home'),
     url(r'^login/$', views.login, name='SE_login'),
+    url(r'^character/(?P<character_uuid>[-0-9a-f]*)/$',
+        views.display_character, name='SE_character'),
+    url(r'^new_character/', views.new_character, name='new_character'),
     url('', include(social_urls, namespace='social')),
     url('', include(auth_urls, namespace='auth')),
 ]
