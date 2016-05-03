@@ -11,9 +11,9 @@ from django.test import TestCase
 from SymmetricalEureka import models  # , views
 
 
-class IndexPageTest(TestCase):
+class NoUserTests(TestCase):
     """
-    Class of tests for the home page.
+    Tests that don't require a user in the database.
     """
 
     def test_home_responds(self):
@@ -24,26 +24,6 @@ class IndexPageTest(TestCase):
         # pylint: disable=no-member
         self.assertEqual(response.status_code, 200)
 
-    def test_home_responds_logged_in(self):
-        """
-        Test that home page responds.
-        """
-        test_user = User.objects.create_user("Bob", password="password")
-        try:
-            self.client.force_login(test_user)
-        except AttributeError:
-            # For Django 1.8
-            self.client.login(username="Bob", password="password")
-        response = self.client.get(reverse('SE_home'))
-        # pylint: disable=no-member
-        self.assertEqual(response.status_code, 200)
-
-
-class LoginPageTest(TestCase):
-    """
-    Class of tests for the login page.
-    """
-
     def test_login_responds(self):
         """
         Test that login page responds.
@@ -51,20 +31,6 @@ class LoginPageTest(TestCase):
         response = self.client.get(reverse('SE_login'))
         # pylint: disable=no-member
         self.assertEqual(response.status_code, 200)
-
-    def test_login_redirects(self):
-        """
-        Test that login page redirects if already logged in.
-        """
-        test_user = User.objects.create_user("Bob", password="password")
-        try:
-            self.client.force_login(test_user)
-        except AttributeError:
-            # For Django 1.8
-            self.client.login(username="Bob", password="password")
-        response = self.client.get(reverse('SE_login'))
-        # pylint: disable=no-member
-        self.assertRedirects(response, reverse('SE_home'))
 
     def test_logins_redirect_to_home(self):
         """
@@ -74,77 +40,57 @@ class LoginPageTest(TestCase):
         response = self.client.get(reverse('SE_login'))
         self.assertContains(response, "?next={}".format(reverse('SE_home')))
 
-
-class CharacterPageTests(TestCase):
-    """
-    Class of tests for the Character page.
-    """
-
-    def test_character_responds(self):
-        """
-        Test that character page responds.
-        """
-        test_user = User.objects.create_user("Mike", password="password")
-        test_character = models.Character(player=test_user,
-                                          character_name="Zeke")
-        # pylint: disable=no-member
-        test_character.save()
-        try:
-            self.client.force_login(test_user)
-        except AttributeError:
-            # For Django 1.8
-            self.client.login(username="Mike", password="password")
-        test_url = reverse('SE_character',
-                           kwargs={'character_uuid':
-                                   test_character.Char_uuid})
-        response = self.client.get(test_url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_cant_access_others_char(self):
-        """
-        Test that a user can't access another user's character.
-        """
-        test_user = User.objects.create_user("Mike", password="password")
-        second_user = User.objects.create_user("Tim", password="password")
-        test_character = models.Character(player=test_user,
-                                          character_name="Zeke")
-        # pylint: disable=no-member
-        test_character.save()
-        try:
-            self.client.force_login(second_user)
-        except AttributeError:
-            # For Django 1.8
-            self.client.login(username="Tim", password="password")
-        test_url = reverse('SE_character',
-                           kwargs={'character_uuid':
-                                   test_character.Char_uuid})
-        response = self.client.get(test_url)
-        self.assertEqual(response.status_code, 401)
-
-
-class NewCharacterPageTests(TestCase):
-    """
-    Class of tests for the New Character page.
-    """
-
     def test_new_character_responds(self):
         """
-        Test that new character page responds.
+        Test that new character page redirects.
         """
         response = self.client.get(reverse('new_character'))
         self.assertRedirects(response, reverse('SE_login') + '?next=' +
                              reverse('new_character'))
 
+
+class OneUserTests(TestCase):
+    """
+    Tests that require a loggedin user.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Initialize database for tests.
+        """
+        cls.test_user = User.objects.create_user("Mike", password="password")
+
+    def setUp(self):
+        """
+        Log user in.
+        """
+        try:
+            self.client.force_login(self.test_user)
+        except AttributeError:
+            # For Django 1.8
+            self.client.login(username="Mike", password="password")
+
+    def test_home_responds_logged_in(self):
+        """
+        Test that home page responds.
+        """
+        response = self.client.get(reverse('SE_home'))
+        # pylint: disable=no-member
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_redirects(self):
+        """
+        Test that login page redirects if already logged in.
+        """
+        response = self.client.get(reverse('SE_login'))
+        # pylint: disable=no-member
+        self.assertRedirects(response, reverse('SE_home'))
+
     def test_new_character_loggedin(self):
         """
         Test that new character page responds when logged in.
         """
-        test_user = User.objects.create_user("Mike", password="password")
-        try:
-            self.client.force_login(test_user)
-        except AttributeError:
-            # For Django 1.8
-            self.client.login(username="Mike", password="password")
         response = self.client.get(reverse('new_character'))
         self.assertEqual(response.status_code, 200)
 
@@ -152,13 +98,81 @@ class NewCharacterPageTests(TestCase):
         """
         Test that new character gets created.
         """
-        test_user = User.objects.create_user("Mike", password="password")
+        response = self.client.post(reverse('new_character'),
+                                    {'character_name': 'Hrothgar'})
+        self.assertIsInstance(response, HttpResponseRedirect)
+
+
+class UserWithCharacterTests(TestCase):
+    """
+    Class of tests that require a logged in user with a character.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Initialize database for tests.
+        """
+        cls.test_user = User.objects.create_user("Mike", password="password")
+        cls.test_character = models.Character(player=cls.test_user,
+                                              character_name="Zeke")
+        # pylint: disable=no-member
+        cls.test_character.save()
+
+    def setUp(self):
+        """
+        Log user in.
+        """
         try:
-            self.client.force_login(test_user)
+            self.client.force_login(self.test_user)
         except AttributeError:
             # For Django 1.8
             self.client.login(username="Mike", password="password")
-        response = self.client.post(reverse('new_character'),
-                                    {'character_name': 'Hrothgar'})
-        # self.assertEqual(response.status, 302)
-        self.assertIsInstance(response, HttpResponseRedirect)
+
+    def test_character_responds(self):
+        """
+        Test that character page responds.
+        """
+        test_url = reverse('SE_character',
+                           kwargs={'character_uuid':
+                                   self.test_character.Char_uuid})
+        response = self.client.get(test_url)
+        self.assertEqual(response.status_code, 200)
+
+
+class TwoUsersWithCharacterTests(TestCase):
+    """
+    Class of tests that require a logged in user with a character.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Initialize database for tests.
+        """
+        cls.test_user = User.objects.create_user("Mike", password="password")
+        cls.second_user = User.objects.create_user("Tim", password="password")
+        cls.test_character = models.Character(player=cls.test_user,
+                                              character_name="Zeke")
+        # pylint: disable=no-member
+        cls.test_character.save()
+
+    def setUp(self):
+        """
+        Log user in.
+        """
+        try:
+            self.client.force_login(self.second_user)
+        except AttributeError:
+            # For Django 1.8
+            self.client.login(username="Tim", password="password")
+
+    def test_cant_access_others_char(self):
+        """
+        Test that a user can't access another user's character.
+        """
+        test_url = reverse('SE_character',
+                           kwargs={'character_uuid':
+                                   self.test_character.Char_uuid})
+        response = self.client.get(test_url)
+        self.assertEqual(response.status_code, 401)
