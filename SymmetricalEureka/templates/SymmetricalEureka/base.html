@@ -29,10 +29,10 @@
                 <li class="dropdown active">
                   <a class="dropdown-toggle" data-toggle="dropdown" href="#">Characters<span class="caret"></span></a>
                   <ul class="dropdown-menu">
-                    <li><a href="#">Create Character <span class="glyphicon glyphicon-plus"></span></a></li>
+                      <li><a href="{% url 'new_character' %}">Create Character <span class="glyphicon glyphicon-plus"></span></a></li>
                     <li class="divider"></li>
                     {% for character in character_list %}
-                      <li><a href="#">{{ character.character_name }}</a></li>
+                    <li><a href="{% url 'SE_character' character_uuid=character.Char_uuid %}">{{ character.character_name }}</a></li>
                     {% endfor %}
                   </ul>
                 </li>

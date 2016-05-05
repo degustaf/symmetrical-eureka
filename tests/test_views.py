@@ -6,7 +6,8 @@ from django.contrib.auth.models import User
 # from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.utils.html import escape
 
 from SymmetricalEureka import models  # , views
 
@@ -98,9 +99,22 @@ class OneUserTests(TestCase):
         """
         Test that new character gets created.
         """
-        response = self.client.post(reverse('new_character'),
-                                    {'character_name': 'Hrothgar'})
+        csrf_client = Client(enforce_csrf_checks=True)
+        try:
+            csrf_client.force_login(self.test_user)
+        except AttributeError:
+            # For Django 1.8
+            csrf_client.login(username="Mike", password="password")
+        response = csrf_client.get(reverse('new_character'))
+        csrf_token = csrf_client.cookies['csrftoken'].value
+        response = csrf_client.post(reverse('new_character'),
+                                    {'character_name': ['Hrothgar'],
+                                     'csrfmiddlewaretoken': csrf_token})
         self.assertIsInstance(response, HttpResponseRedirect)
+        response = csrf_client.get(response.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Hrothgar')
+        self.assertNotContains(response, escape("['Hrothgar']"))
 
 
 class UserWithCharacterTests(TestCase):
@@ -138,6 +152,14 @@ class UserWithCharacterTests(TestCase):
                                    self.test_character.Char_uuid})
         response = self.client.get(test_url)
         self.assertEqual(response.status_code, 200)
+
+    def test_char_on_new_char(self):
+        """
+        Test that character name shows up in header of New Character page.
+        """
+        response = self.client.get(reverse('new_character'))
+        self.assertContains(response, "Zeke")
+        self.assertNotContains(response, "['Zeke']")
 
 
 class TwoUsersWithCharacterTests(TestCase):

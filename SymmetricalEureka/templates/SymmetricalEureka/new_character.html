@@ -5,9 +5,10 @@
   <h1>Create New Character</h1>
 
   <form method="post">
+    {% csrf_token %}
     <div class="form-group">
       <label for="character_name">Character Name</label>
-      <input type="text" class="form-control" id="character_name">
+      <input type="text" class="form-control" name="character_name" id="character_name">
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
   </form>

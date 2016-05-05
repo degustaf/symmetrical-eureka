@@ -20,6 +20,7 @@ def home(request):
     if request.user.is_authenticated():
         character_list = Character.objects.filter(
             player=request.user).order_by('character_name')
+
     context = RequestContext(request, {'request': request,
                                        'user': request.user,
                                        'character_list': character_list})
@@ -67,9 +68,18 @@ def new_character(request):
     View to create a new character.
     """
     if request.method == 'GET':
-        return render_to_response('SymmetricalEureka/new_character.html')
+        character_list = Character.objects.filter(
+            player=request.user).order_by('character_name')
+
+        context = RequestContext(request, {'request': request,
+                                           'user': request.user,
+                                           'character_list': character_list})
+        return render_to_response('SymmetricalEureka/new_character.html',
+                                  context)
     if request.method == 'POST':
-        char = Character(player=request.user, **request.POST)
+        data = {k: request.POST.get(k) for k in request.POST.keys()
+                if k != 'csrfmiddlewaretoken'}
+        char = Character(player=request.user, **data)
         # pylint: disable=no-member
         char.save()
         return redirect('SE_character', character_uuid=str(char.Char_uuid))
