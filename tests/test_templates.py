@@ -85,5 +85,13 @@ class OneCharTemplateTests(TestCase):
         response = self.client.get(reverse('SE_home'))
         self.assertContains(response, self.test_character.character_name)
         self.assertContains(response, reverse('SE_character', kwargs={
-            'character_uuid': self.test_character.Char_uuid}))
-        self.assertContains(response, "Zeke")
+            'Char_uuid': self.test_character.Char_uuid}))
+        self.assertContains(response, self.test_character.character_name)
+
+    def test_character_shows_as_title(self):
+        """
+        Test that character name appears as title in h1 block.
+        """
+        response = self.client.get(reverse('SE_character', kwargs={
+            'Char_uuid': self.test_character.Char_uuid}))
+        self.assertContains(response, '<h1>Zeke</h1>')
