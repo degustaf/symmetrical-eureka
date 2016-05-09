@@ -1,7 +1,10 @@
 [run]
 include =
-    SymmetricalEureka/*.py
-    SymmetricalEureka/**/*.py
+    SymmetricalEureka/*
+    SymmetricalEureka/**/*
 
 omit =
     SymmetricalEureka/migrations/*.py
+
+plugins =
+    django_coverage_plugin

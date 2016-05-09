@@ -72,5 +72,7 @@ matrix:
       env: TOXENV=pyovernight-djangodev
     - python: 3.5
       env: TOXENV=lint
+    - python: 3.5
+      env: TOXENV=coverage
 
 sudo: false
