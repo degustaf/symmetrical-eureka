@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
 """
 Classes to test views code.
 """
+
+from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
 # from django.contrib.auth.views import login
@@ -201,3 +204,47 @@ class TwoUsersWithCharacterTests(TestCase):
                                    self.test_character.Char_uuid})
         response = self.client.get(test_url)
         self.assertEqual(response.status_code, 403)
+
+
+class TestUnicode(TestCase):
+    """
+    Tests to verify that unicode is being handled properly.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Initialize database for tests.
+        """
+        cls.test_user = User.objects.create_user("Mike", password="password")
+        cls.test_character = models.Character(player=cls.test_user,
+                                              character_name="Ráðormsdóttir")
+        # pylint: disable=no-member
+        cls.test_character.save()
+        cls.test_character_url = reverse('SE_character',
+                                         kwargs={'Char_uuid':
+                                                 cls.test_character.Char_uuid})
+
+    def setUp(self):
+        """
+        Log user in.
+        """
+        try:
+            self.client.force_login(self.test_user)
+        except AttributeError:
+            # For Django 1.8
+            self.client.login(username="Mike", password="password")
+
+    def test_name_in_header(self):
+        """
+        Test that unicode character name appears in header.
+        """
+        response = self.client.get(reverse('SE_home'))
+        self.assertContains(response, "Ráðormsdóttir")
+
+    def test_name_on_character_page(self):
+        """
+        Test that unicode name appears as title on character page.
+        """
+        response = self.client.get(self.test_character_url)
+        self.assertContains(response, "<h1>Ráðormsdóttir</h1>".encode('utf-8'))
