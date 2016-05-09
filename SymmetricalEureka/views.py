@@ -119,6 +119,7 @@ class DisplayCharacterView(PlayerLoggedIn, DetailView):
         """
         Override TemplateView.dispatch to test if Character belongs to User.
         """
+        # pylint: disable=attribute-defined-outside-init
         self.player_character = Character.objects.get(
             Char_uuid=kwargs['Char_uuid'])
         if self.player_character.player.id != request.user.id:
@@ -133,7 +134,7 @@ class NewCharacterView(PlayerLoggedIn, CreateView):
     """
     template_name = 'SymmetricalEureka/new_character.html'
     model = Character
-    fields = ['character_name']
+    fields = ['character_name', 'alignment']
 
     def form_valid(self, form):
         """

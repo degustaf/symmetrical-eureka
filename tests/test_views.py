@@ -114,6 +114,7 @@ class OneUserTests(TestCase):
         csrf_token = csrf_client.cookies['csrftoken'].value
         response = csrf_client.post(reverse('new_character'),
                                     {'character_name': ['Hrothgar'],
+                                     'alignment': ['CG'],
                                      'csrfmiddlewaretoken': csrf_token})
         self.assertIsInstance(response, HttpResponseRedirect)
         response = csrf_client.get(response.url).render()

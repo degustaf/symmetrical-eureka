@@ -40,9 +40,11 @@ class OneUserTemplateTests(TestCase):
         self.assertContains(response, 'html')
         self.assertContains(response, 'Create New Character')
         self.assertContains(response, 'form')
-        self.assertContains(response, 'Character Name')
+        self.assertContains(response, 'Character name')
         self.assertContains(response, 'method="post"')
         self.assertContains(response, 'submit')
+        self.assertContains(response, 'select')
+        self.assertContains(response, 'alignment')
 
     def test_homepage_has_new_char_link(self):
         """
@@ -95,3 +97,11 @@ class OneCharTemplateTests(TestCase):
         response = self.client.get(reverse('SE_character', kwargs={
             'Char_uuid': self.test_character.Char_uuid}))
         self.assertContains(response, '<h1>Zeke</h1>')
+
+    def test_alignment_ahows(self):
+        """
+        Test that alignment displays on character page.
+        """
+        response = self.client.get(reverse('SE_character', kwargs={
+            'Char_uuid': self.test_character.Char_uuid}))
+        self.assertContains(response, 'Alignment')

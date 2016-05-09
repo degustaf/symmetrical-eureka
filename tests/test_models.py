@@ -28,8 +28,10 @@ class CharacterTest(TestCase):
         Test ability to create Character
         """
         test_character = models.Character(player=self.test_user,
-                                          character_name="Zeke")
+                                          character_name="Zeke",
+                                          alignment="CN")
         self.assertEqual(test_character.character_name, "Zeke")
+        self.assertEqual(test_character.alignment, "CN")
 
     def test_unicode_name(self):
         """
