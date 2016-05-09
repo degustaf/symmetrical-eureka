@@ -31,8 +31,8 @@
                   <ul class="dropdown-menu">
                       <li><a href="{% url 'new_character' %}">Create Character <span class="glyphicon glyphicon-plus"></span></a></li>
                     <li class="divider"></li>
-                    {% for character in character_list %}
-                    <li><a href="{% url 'SE_character' character_uuid=character.Char_uuid %}">{{ character.character_name }}</a></li>
+                    {% for character in view.character_list %}
+                    <li><a href="{% url 'SE_character' Char_uuid=character.Char_uuid %}">{{ character.character_name }}</a></li>
                     {% endfor %}
                   </ul>
                 </li>

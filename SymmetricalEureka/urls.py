@@ -12,11 +12,12 @@ admin.autodiscover()
 
 # pylint: disable=invalid-name
 urlpatterns = [
-    url(r'^$', views.home, name='SE_home'),
-    url(r'^login/$', views.login, name='SE_login'),
-    url(r'^character/(?P<character_uuid>[-0-9a-f]*)/$',
-        views.display_character, name='SE_character'),
-    url(r'^new_character/', views.new_character, name='new_character'),
+    url(r'^$', views.HomeView.as_view(), name='SE_home'),
+    url(r'^login/$', views.LoginView.as_view(), name='SE_login'),
+    url(r'^character/(?P<Char_uuid>[-0-9a-f]*)/$',
+        views.DisplayCharacterView.as_view(), name='SE_character'),
+    url(r'^new_character/', views.NewCharacterView.as_view(),
+        name='new_character'),
     url('', include(social_urls, namespace='social')),
     url('', include(auth_urls, namespace='auth')),
 ]

@@ -45,7 +45,9 @@ class NoUserTests(TestCase):
         """
         Test that new character page redirects.
         """
-        response = self.client.get(reverse('new_character'))
+        url = reverse('new_character')
+        response = self.client.get(url)
+        # response = self.client.get(reverse('new_character'))
         self.assertRedirects(response, reverse('SE_login') + '?next=' +
                              reverse('new_character'))
 
@@ -111,8 +113,9 @@ class OneUserTests(TestCase):
                                     {'character_name': ['Hrothgar'],
                                      'csrfmiddlewaretoken': csrf_token})
         self.assertIsInstance(response, HttpResponseRedirect)
-        response = csrf_client.get(response.url)
+        response = csrf_client.get(response.url).render()
         self.assertEqual(response.status_code, 200)
+        # print(response.contents)
         self.assertContains(response, 'Hrothgar')
         self.assertNotContains(response, escape("['Hrothgar']"))
 
@@ -148,7 +151,7 @@ class UserWithCharacterTests(TestCase):
         Test that character page responds.
         """
         test_url = reverse('SE_character',
-                           kwargs={'character_uuid':
+                           kwargs={'Char_uuid':
                                    self.test_character.Char_uuid})
         response = self.client.get(test_url)
         self.assertEqual(response.status_code, 200)
@@ -194,7 +197,7 @@ class TwoUsersWithCharacterTests(TestCase):
         Test that a user can't access another user's character.
         """
         test_url = reverse('SE_character',
-                           kwargs={'character_uuid':
+                           kwargs={'Char_uuid':
                                    self.test_character.Char_uuid})
         response = self.client.get(test_url)
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
