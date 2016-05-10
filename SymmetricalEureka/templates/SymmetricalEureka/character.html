@@ -1,11 +1,39 @@
 {% extends 'SymmetricalEureka/base.html' %}
 {% load bootstrap3 %}
+{% load SymmetricalEureka %}
+
+{% block script %}
+<script>
+$(document).ready(function () {
+    $('div.ability-score-block input').focusout(update_ability_score);
+    })
+</script>
+{% endblock %}
 
 {% block main %}
 <div>
     <h1>{{ view.player_character.character_name }}</h1>
+    
+    <div class="hidden" id="uuid">{{ view.player_character.Char_uuid }}</div>
 
-    <p>Alignment: {{ view.player_character.alignment }}</p>
+    <div>
+        <p>Alignment: {{ view.player_character.alignment }}</p>
+    </div>
+        <fieldset class="toggle-border" id="ability-scores">
+            <legend>
+                <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                Ability Scores
+            </legend>
+            <div class="row">
+                {% bs_ability_score_display view.player_character "strength" %}
+                {% bs_ability_score_display view.player_character "dexterity" %}
+                {% bs_ability_score_display view.player_character "constitution" %}
+                {% bs_ability_score_display view.player_character "intelligence" %}
+                {% bs_ability_score_display view.player_character "wisdom" %}
+                {% bs_ability_score_display view.player_character "charisma" %}
+            </div>
+        </fieldset>
+    </div>
 
 </div>
 {% endblock %}

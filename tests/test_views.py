@@ -6,13 +6,12 @@ Classes to test views code.
 from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
-# from django.contrib.auth.views import login
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse  # , resolve
 from django.http import HttpResponseRedirect
 from django.test import TestCase, Client
 from django.utils.html import escape
 
-from SymmetricalEureka import models  # , views
+from SymmetricalEureka.models import Character
 
 
 class NoUserTests(TestCase):
@@ -59,13 +58,15 @@ class OneUserTests(TestCase):
     """
     Tests that require a loggedin user.
     """
+    fixtures = ['user_mike.json']
 
     @classmethod
     def setUpTestData(cls):
         """
         Initialize database for tests.
         """
-        cls.test_user = User.objects.create_user("Mike", password="password")
+        # pylint: disable=no-member
+        cls.test_user = User.objects.get(username="Mike")
 
     def setUp(self):
         """
@@ -115,6 +116,12 @@ class OneUserTests(TestCase):
         response = csrf_client.post(reverse('new_character'),
                                     {'character_name': ['Hrothgar'],
                                      'alignment': ['CG'],
+                                     'strength': [9],
+                                     'dexterity': [9],
+                                     'constitution': [9],
+                                     'intelligence': [9],
+                                     'wisdom': [9],
+                                     'charisma': [9],
                                      'csrfmiddlewaretoken': csrf_token})
         self.assertIsInstance(response, HttpResponseRedirect)
         response = csrf_client.get(response.url).render()
@@ -128,17 +135,16 @@ class UserWithCharacterTests(TestCase):
     """
     Class of tests that require a logged in user with a character.
     """
+    fixtures = ['user_mike.json', 'zeke.json']
 
     @classmethod
     def setUpTestData(cls):
         """
         Initialize database for tests.
         """
-        cls.test_user = User.objects.create_user("Mike", password="password")
-        cls.test_character = models.Character(player=cls.test_user,
-                                              character_name="Zeke")
         # pylint: disable=no-member
-        cls.test_character.save()
+        cls.test_user = User.objects.get(username="Mike")
+        cls.test_character = Character.objects.get(character_name="Zeke")
 
     def setUp(self):
         """
@@ -173,23 +179,20 @@ class TwoUsersWithCharacterTests(TestCase):
     """
     Class of tests that require a logged in user with a character.
     """
+    fixtures = ['user_mike.json', 'user_tim.json', 'zeke.json']
 
     @classmethod
     def setUpTestData(cls):
         """
         Initialize database for tests.
         """
-        cls.test_user = User.objects.create_user("Mike", password="password")
-        cls.second_user = User.objects.create_user("Tim", password="password")
-        cls.test_character = models.Character(player=cls.test_user,
-                                              character_name="Zeke")
         # pylint: disable=no-member
-        cls.test_character.save()
+        cls.test_user = User.objects.get(username="Mike")
+        cls.second_user = User.objects.get(username="Tim")
+        cls.test_character = Character.objects.get(character_name="Zeke")
 
     def setUp(self):
-        """
-        Log user in.
-        """
+        """ Log user in."""
         try:
             self.client.force_login(self.second_user)
         except AttributeError:
@@ -197,9 +200,7 @@ class TwoUsersWithCharacterTests(TestCase):
             self.client.login(username="Tim", password="password")
 
     def test_cant_access_others_char(self):
-        """
-        Test that a user can't access another user's character.
-        """
+        """ Test that a user can't access another user's character."""
         test_url = reverse('SE_character',
                            kwargs={'Char_uuid':
                                    self.test_character.Char_uuid})
@@ -208,28 +209,23 @@ class TwoUsersWithCharacterTests(TestCase):
 
 
 class TestUnicode(TestCase):
-    """
-    Tests to verify that unicode is being handled properly.
-    """
+    """ Tests to verify that unicode is being handled properly."""
+    fixtures = ['user_mike.json', 'zeke.json']
 
     @classmethod
     def setUpTestData(cls):
-        """
-        Initialize database for tests.
-        """
-        cls.test_user = User.objects.create_user("Mike", password="password")
-        cls.test_character = models.Character(player=cls.test_user,
-                                              character_name="Ráðormsdóttir")
+        """ Initialize database for tests."""
         # pylint: disable=no-member
+        cls.test_user = User.objects.get(username="Mike")
+        cls.test_character = Character.objects.get(character_name="Zeke")
+        cls.test_character.character_name = "Ráðormsdóttir"
         cls.test_character.save()
         cls.test_character_url = reverse('SE_character',
                                          kwargs={'Char_uuid':
                                                  cls.test_character.Char_uuid})
 
     def setUp(self):
-        """
-        Log user in.
-        """
+        """ Log user in."""
         try:
             self.client.force_login(self.test_user)
         except AttributeError:
@@ -237,15 +233,11 @@ class TestUnicode(TestCase):
             self.client.login(username="Mike", password="password")
 
     def test_name_in_header(self):
-        """
-        Test that unicode character name appears in header.
-        """
+        """ Test that unicode character name appears in header."""
         response = self.client.get(reverse('SE_home'))
         self.assertContains(response, "Ráðormsdóttir")
 
     def test_name_on_character_page(self):
-        """
-        Test that unicode name appears as title on character page.
-        """
+        """ Test that unicode name appears as title on character page."""
         response = self.client.get(self.test_character_url)
         self.assertContains(response, "<h1>Ráðormsdóttir</h1>".encode('utf-8'))

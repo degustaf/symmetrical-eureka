@@ -1,0 +1,10 @@
+[
+{
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$24000$4w2abagKRmJK$p2BSAe44JyMl9yyiTonrYeanY/dysr8OJu57iSHPkEM=",
+        "username": "Mike"
+    }
+}
+]

@@ -1,12 +1,18 @@
+# -*- coding: utf-8 -*-
 """
 Django Models
 """
+from __future__ import unicode_literals, division
 from uuid import uuid4
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 
 
+@python_2_unicode_compatible
 class Character(models.Model):
     """
     Class to Hold Character Data.
@@ -18,6 +24,20 @@ class Character(models.Model):
 
     character_name = models.CharField(max_length=256,
                                       db_index=True)
+    # Ability Scores
+    strength = models.PositiveSmallIntegerField(validators=[
+        MinValueValidator(1), MaxValueValidator(25)])
+    dexterity = models.PositiveSmallIntegerField(validators=[
+        MinValueValidator(1), MaxValueValidator(25)])
+    constitution = models.PositiveSmallIntegerField(validators=[
+        MinValueValidator(1), MaxValueValidator(25)])
+    intelligence = models.PositiveSmallIntegerField(validators=[
+        MinValueValidator(1), MaxValueValidator(25)])
+    wisdom = models.PositiveSmallIntegerField(validators=[
+        MinValueValidator(1), MaxValueValidator(25)])
+    charisma = models.PositiveSmallIntegerField(validators=[
+        MinValueValidator(1), MaxValueValidator(25)])
+
     alignment = models.CharField(max_length=2,
                                  choices=(("LG", "Lawful Good"),
                                           ("NG", "Neutral Good"),
@@ -27,8 +47,7 @@ class Character(models.Model):
                                           ("CN", "Chaotic Neutral"),
                                           ("LE", "Lawful Evil"),
                                           ("NE", "Neutral Evil"),
-                                          ("CE", "Chaotic Evil"),),
-                                 default="NN")
+                                          ("CE", "Chaotic Evil"),))
 
     def get_absolute_url(self):
         """
@@ -39,3 +58,8 @@ class Character(models.Model):
 
     def __str__(self):
         return self.character_name
+
+    @classmethod
+    def ability_score_mod(cls, ability_score):
+        """ Calculate modifier from ability score."""
+        return int(ability_score) // 2 - 5

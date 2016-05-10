@@ -21,6 +21,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.staticfiles',
     'SymmetricalEureka',
     'social.apps.django_app.default',
     'bootstrap3',
@@ -68,10 +69,19 @@ MIDDLEWARE_CLASSES = (
 )
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/home/degustaf/madlibs/static'
+STATIC_ROOT = '/home/degustaf/symmetrical-eureka/SymmetricalEureka/static/'
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
+
+BOOTSTRAP3 = {
+    'field_renderers': {
+        'default': 'bootstrap3.renderers.FieldRenderer',
+        'inline': 'bootstrap3.renderers.InlineFieldRenderer',
+        'ability_scores':
+            'SymmetricalEureka.renderers.AbilityScoreFieldRenderer',
+        },
+    }
 
 # Social Auth Keys
 SOCIAL_AUTH_FACEBOOK_KEY = 'test_Facebook_key'

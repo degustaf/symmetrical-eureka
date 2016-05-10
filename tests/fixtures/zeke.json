@@ -1,0 +1,17 @@
+[
+{
+    "model": "SymmetricalEureka.character",
+    "pk": "00000000-0000-0000-0000-000000000000",
+    "fields": {
+        "player": 1,
+        "character_name": "Zeke",
+        "alignment": "CN",
+        "strength": 9,
+        "dexterity": 10,
+        "constitution": 12,
+        "intelligence": 15,
+        "wisdom": 3,
+        "charisma": 17
+    }
+}
+]
