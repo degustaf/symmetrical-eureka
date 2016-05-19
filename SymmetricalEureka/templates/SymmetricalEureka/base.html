@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load staticfiles %}
 {% load bootstrap3 %}
 <html lang="en">
  <head>
@@ -7,7 +8,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}SymmetricalEureka{% endblock %}</title>
     {% bootstrap_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'SymmetricalEureka/style.css' %}"i />
     {% bootstrap_javascript jquery=True %}
+    <script src="{% static 'SymmetricalEureka/js/SE.js' %}"></script>
+    {% block script %} {% endblock %}
  </head>
 
  <body>
@@ -53,7 +57,9 @@
       </nav>
     {% endblock %}
 
-    {% block main %}{% endblock %}
+    <div class="container">
+      {% block main %}{% endblock %}
+    </div>
 
  </body>
 </html>

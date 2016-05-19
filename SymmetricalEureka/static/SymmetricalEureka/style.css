@@ -1,0 +1,60 @@
+div.ability-score-block {
+    text-align: center;
+    margin-top: 2px;
+}
+
+div.ability-score-block input,
+.ability-score,
+div.as-mod-padding,
+div.ability-score-block label.control-label {
+    background-color: transparent;
+    text-align: center;
+}
+
+div.ability-score-block label.control-label {
+    display: inline-block;
+    margin: 0;
+}
+
+fieldset {
+    margin-top: 10px;
+}
+.toggle-border {
+    border: 1px solid black;
+    border-radius: 4px;
+}
+
+legend {
+    border-bottom: 0;
+    margin-bottom: 0;
+    width: initial;
+    margin-left: 10px;
+}
+
+.row {
+    margin: 0;
+    margin-bottom: 10px;
+}
+
+div.ability-score-block > div{
+    border: 2px solid black;
+    display: inline-block;
+}
+
+.ability-score-mod {
+    display: inline-block;
+    min-width: 25px;
+    min-height: 22px;
+    margin: 5px;
+}
+
+.badge:empty {
+    display: inline-block;
+}
+
+.invisible {
+    height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border: 0;
+}
