@@ -13,6 +13,10 @@ from social.apps.django_app import views as social_views
 
 # from SymmetricalEureka import views
 
+# For url testing class based views:
+# http://stackoverflow.com/questions/27320821/django-how-to-assert-url-pattern-resolves-to-correct-class-based-view-function
+# Or use pdb.setbreak.
+
 
 class UrlTest(TestCase):
     """

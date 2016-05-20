@@ -144,3 +144,13 @@ class OneCharTemplateTests(TestCase):
         expected_result = '<div class="hidden" id="uuid">{}</div>'.format(
             self.test_character.Char_uuid)
         self.assertContains(response, expected_result)
+
+    def test_logout_redirects_to_home(self):
+        """
+        Test that after user is logged out, they are redirected to the home
+        page.
+        """
+        response = self.client.get(self.test_url)
+        expected_result = "{}?next={}".format(reverse("auth:logout"),
+                                              reverse("SE_home"))
+        self.assertContains(response, expected_result)
