@@ -3,6 +3,11 @@ Views for SymmetricalEureka
 """
 
 from importlib import import_module
+try:
+    from inspect import signature
+except ImportError:
+    # pylint: disable=import-error
+    from funcsigs import signature
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.urlresolvers import reverse_lazy
@@ -10,7 +15,7 @@ from django.db.models import base
 from django.http import (Http404, HttpResponseBadRequest, HttpResponseRedirect,
                          JsonResponse)
 from django.utils.datastructures import MultiValueDictKeyError
-from django.views.generic import CreateView, DetailView
+from django.views.generic import DetailView
 from django.views.generic.base import TemplateView, View
 from django.views.generic.detail import BaseDetailView
 
@@ -21,7 +26,8 @@ except ImportError:
     from SymmetricalEureka.backports.django_contrib_auth_mixins import\
         LoginRequiredMixin, PermissionRequiredMixin
 
-from SymmetricalEureka.models import Character
+from .models import AbilityScores, Character
+from .forms import AbilityScoresForm, CharacterForm
 
 
 # pylint: disable=too-many-ancestors
@@ -100,7 +106,7 @@ class DisplayCharacterView(PlayerLoggedIn, DetailView):
     """
     template_name = 'SymmetricalEureka/character.html'
     pk_url_kwarg = 'Char_uuid'
-    queryset = Character.objects.all()
+    model = Character
 
     def dispatch(self, request, *args, **kwargs):
         """
@@ -114,31 +120,24 @@ class DisplayCharacterView(PlayerLoggedIn, DetailView):
         return super(DisplayCharacterView, self).dispatch(request, *args,
                                                           **kwargs)
 
+    def get_context_data(self, **kwargs):
+        kwargs['ability_scores'] = self.get_ability_scores()
+        return super(DisplayCharacterView, self).get_context_data(**kwargs)
 
-class NewCharacterView(PlayerLoggedIn, CreateView):
-    """
-    Class for the view to create a new character.
-    """
-    template_name = 'SymmetricalEureka/new_character.html'
-    model = Character
-    fields = ['character_name', 'alignment', 'strength', 'dexterity',
-              'constitution', 'intelligence', 'wisdom', 'charisma']
-    fieldsets = []
+    def get_ability_scores(self):
+        """ generate a list of the ability scores for the character."""
+        return AbilityScores.objects.filter(character=self.player_character)
 
-    def form_valid(self, form):
-        """
-        Override form_valid() to insert player for the model.
-        """
-        # pylint: disable=attribute-defined-outside-init
-        self.object = form.save(commit=False)
-        self.object.player = self.request.user
-        self.object.save()
-        return super(NewCharacterView, self).form_valid(form)
+
+def build_kwargs(func, data):
+    """ Build a dictionary of arguments for func out of data."""
+    return {x: data.get(x, None) for x in signature(func).parameters.keys()}
 
 
 class ClassMethodView(View):
     """ Class that exposes classmethods of Django models."""
     module = 'SymmetricalEureka.models'
+    extra_methods = {'ability_score_mod': ['abs_saving_throw']}
 
     def get(self, request, *args, **kwargs):
         """ Handle get requests by passing arguments to classmethod."""
@@ -154,78 +153,128 @@ class ClassMethodView(View):
             fnc = getattr(cls, method)
         except AttributeError:
             raise Http404()
-        new_kwargs = {k: request.GET[k] for k in request.GET}
+        new_kwargs = build_kwargs(fnc, request.GET)
         try:
             result = fnc(**new_kwargs)
-        except TypeError:
+        except (TypeError, ValueError):
             return HttpResponseBadRequest()
-        response = JsonResponse({method: result})
+        response = {method: result}
 
-        return response
+        for other_method in self.extra_methods.get(method, []):
+            try:
+                fnc = getattr(cls, other_method)
+            except AttributeError:
+                fnc = lambda: None
+            new_kwargs = build_kwargs(fnc, request.GET)
+            try:
+                result = fnc(**new_kwargs)
+                response[other_method] = result
+            except (TypeError, ValueError):
+                pass
+
+        return JsonResponse(response)
 
 
-class CharacterAtributeView(PlayerLoggedIn, BaseDetailView):
+class CharacterAtributeView(LoginRequiredMixin, BaseDetailView):
     """ View that exposes Character Attributes as JSON api."""
     model = Character
-    extra_data = {'strength': ('ability_score_mod',
-                               Character.ability_score_mod),
-                  'dexterity': ('ability_score_mod',
-                                Character.ability_score_mod),
-                  'constitution': ('ability_score_mod',
-                                   Character.ability_score_mod),
-                  'intelligent': ('ability_score_mod',
-                                  Character.ability_score_mod),
-                  'wisdom': ('ability_score_mod',
-                             Character.ability_score_mod),
-                  'charisma': ('ability_score_mod',
-                               Character.ability_score_mod)}
     pk_url_kwarg = 'Char_uuid'
+    raise_exception = True
+    response_class = JsonResponse
 
-    def dispatch(self, request, *args, **kwargs):
+    def get_object(self, queryset=None):
+        character = super(CharacterAtributeView, self).get_object(queryset)
+        if character.player != self.request.user:
+            raise PermissionDenied(self.get_permission_denied_message())
+        # pylint: disable=unsubscriptable-object
+        attr = AbilityScores.WHICH_ENG_2_KEY.get(self.kwargs['attribute'],
+                                                 None)
+        queryset = AbilityScores.objects.all().filter(character=character,
+                                                      which=attr)
+        try:
+            obj = queryset.get()
+        except queryset.model.DoesNotExist:
+            raise Http404
+        return obj
+
+    def render_to_response(self, context, **response_kwargs):
+        """ Render a response."""
+        obj = context['object']
+        response = {AbilityScores.WHICH_KEY_2_ENG[obj.which]: obj.value}
+        response.update(response_kwargs)
+        return self.response_class(response)
+
+    # pylint: disable=unused-argument
+    def post(self, *args, **kwargs):
         """
-        Override TemplateView.dispatch to test if Character belongs to User.
+        Handle post requests by storing to the database and returning the new
+        atrribute value.
         """
         # pylint: disable=attribute-defined-outside-init
         self.object = self.get_object()
-        if self.object.player.id != request.user.id:
-            raise PermissionDenied()
-        return super(CharacterAtributeView, self).dispatch(request, *args,
-                                                           **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        """ Handle get requests by returning atrribute value."""
-        attr = kwargs['attribute']
-        try:
-            result = getattr(self.object, attr)
-        except AttributeError:
-            raise Http404()
-
-        return JsonResponse({attr: result})
-
-    def post(self, *args, **kwargs):
-        """
-        Handle put requests by storing to the database and returning the new
-        atrribute value.
-        """
-        attr = kwargs['attribute']
         request = args[0]
         try:
-            data = request.POST[attr]
+            val = request.POST['value']
         except MultiValueDictKeyError:
-            return HttpResponseBadRequest('')
-        # pylint: disable=protected-access
-        for field in self.object._meta.fields:
-            if field.name == attr:
-                try:
-                    data = field.clean(data, self.object)
-                except ValidationError:
-                    return HttpResponseBadRequest()
-                    # raise Http404()
-                setattr(self.object, attr, data)
-                self.object.save()
-                response = {attr: data}
-                if attr in self.extra_data:
-                    key, val = self.extra_data[attr]
-                    response[key] = val(data)
-                return JsonResponse(response)
-        raise Http404()
+            return HttpResponseBadRequest()
+        try:
+            # pylint: disable=protected-access
+            field = self.object._meta.get_field('value')
+            val = field.clean(val, self.object)
+        except ValidationError:
+            return HttpResponseBadRequest()
+        self.object.value = val
+        self.object.save()
+        func = AbilityScores.ability_score_mod
+
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context,
+                                       ability_score_mod=func(val),
+                                       saving_throw=self.object.saving_throw)
+
+
+class NewCharacterView(PlayerLoggedIn, TemplateView):
+    """
+    Class for the view to create a new character.
+    """
+    template_name = 'SymmetricalEureka/new_character.html'
+
+    def get_context_data(self, **kwargs):
+        if 'character_form' not in kwargs:
+            character_form = CharacterForm(instance=Character())
+            kwargs['character_form'] = character_form
+        if 'as_forms' not in kwargs:
+            as_forms = [AbilityScoresForm(prefix=x[1],
+                                          instance=AbilityScores())
+                        for x in AbilityScores.WHICH_CHOICES]
+            kwargs['as_forms'] = as_forms
+        if 'sav_throw' not in kwargs:
+            sav_throw = [AbilityScores(which=x[0])
+                         for x in AbilityScores.WHICH_CHOICES]
+            kwargs['sav_throw'] = sav_throw
+
+        return super(NewCharacterView, self).get_context_data(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """ Handle POST requests."""
+        character_form = CharacterForm(request.POST, instance=Character())
+        as_forms = [AbilityScoresForm(request.POST, prefix=x[1],
+                                      instance=AbilityScores())
+                    for x in AbilityScores.WHICH_CHOICES]
+        if character_form.is_valid() and \
+                all([af.is_valid() for af in as_forms]):
+            character = character_form.save(commit=False)
+            character.player = self.request.user
+            character.save()
+
+            for as_form in as_forms:
+                ability_score = as_form.save(commit=False)
+                ability_score.character = character
+                ability_score.which = AbilityScores.WHICH_ENG_2_KEY[
+                    as_form.prefix]
+                ability_score.save()
+
+            return HttpResponseRedirect(character.get_absolute_url())
+        else:
+            return self.render_to_response(self.get_context_data(
+                character_form=character_form, as_forms=as_forms))

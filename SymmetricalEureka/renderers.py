@@ -40,3 +40,6 @@ class AbilityScoreFieldRenderer(FieldRenderer):
         html = '<div>{}</div>'.format(html)
         return super(AbilityScoreFieldRenderer, self).wrap_label_and_field(
             html)
+
+    def get_label(self):
+        return self.field.form.prefix.capitalize()

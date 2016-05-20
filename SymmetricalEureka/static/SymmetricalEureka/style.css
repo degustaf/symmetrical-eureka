@@ -1,17 +1,17 @@
-div.ability-score-block {
+div.value-block {
     text-align: center;
     margin-top: 2px;
 }
 
-div.ability-score-block input,
+div.value-block input,
 .ability-score,
 div.as-mod-padding,
-div.ability-score-block label.control-label {
+div.value-block label.control-label {
     background-color: transparent;
     text-align: center;
 }
 
-div.ability-score-block label.control-label {
+div.value-block label.control-label {
     display: inline-block;
     margin: 0;
 }
@@ -36,9 +36,9 @@ legend {
     margin-bottom: 10px;
 }
 
-div.ability-score-block > div{
+div.value-block > div{
     border: 2px solid black;
-    display: inline-block;
+    display: block;
 }
 
 .ability-score-mod {
@@ -57,4 +57,26 @@ div.ability-score-block > div{
     padding-top: 0;
     padding-bottom: 0;
     border: 0;
+}
+
+.proficient,
+.unproficient {
+    margin-bottom: 0;
+}
+.proficient::after,
+.unproficient::after {
+    font-size: 24px;
+    margin-bottom: 0;
+}
+
+.proficient::after {
+    content: "\2612";
+}
+
+.unproficient::after {
+    content: "\2610";
+}
+
+p.sav-score {
+    height: 20px;
 }

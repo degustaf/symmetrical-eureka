@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 # from django.utils.html import format_html
 
-from SymmetricalEureka.models import Character
+from SymmetricalEureka.models import AbilityScores, Character
 from SymmetricalEureka.templatetags.SymmetricalEureka import\
     _bs_ability_score_display  # _bs_ability_score_field
 
@@ -32,9 +32,11 @@ class AbilityScoreDisplayTest(TestCase):
     def test_p_class_placed_properly(self):
         """test that the appropriate class is placed within p tag."""
 
-        result = _bs_ability_score_display(self.test_character, "strength")
+        strength = AbilityScores.objects.get(character=self.test_character,
+                                             which="0_STR")
+        result = _bs_ability_score_display(strength)
         expected_result = '<p class="{}" id="{}">{}</p>'.format(
             'ability-score-mod badge', 'id_mod_strength',
-            Character.ability_score_mod(self.test_character.strength))
+            AbilityScores.ability_score_mod(strength.value))
 
         self.assertInHTML(expected_result, result)

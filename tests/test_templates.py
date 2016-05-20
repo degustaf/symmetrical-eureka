@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from SymmetricalEureka.models import Character
+from SymmetricalEureka.models import AbilityScores, Character
 
 
 class OneUserTemplateTests(TestCase):
@@ -23,6 +23,7 @@ class OneUserTemplateTests(TestCase):
         """
         # pylint: disable=no-member
         cls.test_user = User.objects.get(username="Mike")
+        cls.test_url = reverse('new_character')
 
     def setUp(self):
         """
@@ -38,7 +39,7 @@ class OneUserTemplateTests(TestCase):
         """
         Test that new character page responds.
         """
-        response = self.client.get(reverse('new_character'))
+        response = self.client.get(self.test_url)
         self.assertContains(response, 'html')
         self.assertContains(response, 'Create New Character')
         self.assertContains(response, 'form')
@@ -50,21 +51,21 @@ class OneUserTemplateTests(TestCase):
         """
         Test that new character page has a place for character name.
         """
-        response = self.client.get(reverse('new_character'))
+        response = self.client.get(self.test_url)
         self.assertContains(response, 'Character name')
 
     def test_form_has_alignment(self):
         """
         Test that new character page has alignment field.
         """
-        response = self.client.get(reverse('new_character'))
+        response = self.client.get(self.test_url)
         self.assertContains(response, 'alignment')
 
     def test_form_has_ability_scores(self):
         """
         Test that new character page has ability scores.
         """
-        response = self.client.get(reverse('new_character'))
+        response = self.client.get(self.test_url)
         self.assertContains(response, 'Strength')
         self.assertContains(response, 'Dexterity')
         self.assertContains(response, 'Constitution')
@@ -77,7 +78,12 @@ class OneUserTemplateTests(TestCase):
         Test that homepage has link to new_character page.
         """
         response = self.client.get(reverse('SE_home'))
-        self.assertContains(response, reverse('new_character'))
+        self.assertContains(response, self.test_url)
+
+    def test_saving_throws_new_char(self):
+        """ Test that saving throws appear on new character page."""
+        response = self.client.get(self.test_url)
+        self.assertContains(response, 'Saving Throws')
 
 
 class OneCharTemplateTests(TestCase):
@@ -122,21 +128,16 @@ class OneCharTemplateTests(TestCase):
 
     def test_ability_scores_show(self):
         """ Test that ability scores display on character page."""
+        abil_scores = AbilityScores.objects.all().filter(
+            character=self.test_character)
+
         response = self.client.get(self.test_url)
-        self.assertContains(response, 'Strength')
-        self.assertContains(response, self.test_character.strength)
-        self.assertContains(response, Character.ability_score_mod(
-            self.test_character.strength))
-        self.assertContains(response, 'Dexterity')
-        self.assertContains(response, self.test_character.dexterity)
-        self.assertContains(response, 'Constitution')
-        self.assertContains(response, self.test_character.constitution)
-        self.assertContains(response, 'Intelligence')
-        self.assertContains(response, self.test_character.intelligence)
-        self.assertContains(response, 'Wisdom')
-        self.assertContains(response, self.test_character.wisdom)
-        self.assertContains(response, 'Charisma')
-        self.assertContains(response, self.test_character.charisma)
+        for score in abil_scores:
+            self.assertContains(response, AbilityScores.WHICH_KEY_2_ENG[
+                score.which].capitalize())
+            self.assertContains(response, score.value)
+            self.assertContains(response, AbilityScores.ability_score_mod(
+                score.value))
 
     def test_uuid_appears(self):
         """ Test that uuid is present in page."""
@@ -154,3 +155,8 @@ class OneCharTemplateTests(TestCase):
         expected_result = "{}?next={}".format(reverse("auth:logout"),
                                               reverse("SE_home"))
         self.assertContains(response, expected_result)
+
+    def test_saving_throws_in_character(self):
+        """ Test that saving throws appear on character page."""
+        response = self.client.get(self.test_url)
+        self.assertContains(response, 'Saving Throws')

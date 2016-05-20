@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect
 from django.test import TestCase, Client
 from django.utils.html import escape
 
-from SymmetricalEureka.models import Character
+from SymmetricalEureka.models import AbilityScores, Character
 
 
 class NoUserTests(TestCase):
@@ -49,9 +49,7 @@ class NoUserTests(TestCase):
         """
         url = reverse('new_character')
         response = self.client.get(url)
-        # response = self.client.get(reverse('new_character'))
-        self.assertRedirects(response, reverse('SE_login') + '?next=' +
-                             reverse('new_character'))
+        self.assertRedirects(response, reverse('SE_login') + '?next=' + url)
 
 
 class OneUserTests(TestCase):
@@ -116,19 +114,40 @@ class OneUserTests(TestCase):
         response = csrf_client.post(reverse('new_character'),
                                     {'character_name': ['Hrothgar'],
                                      'alignment': ['CG'],
-                                     'strength': [9],
-                                     'dexterity': [9],
-                                     'constitution': [9],
-                                     'intelligence': [9],
-                                     'wisdom': [9],
-                                     'charisma': [9],
+                                     'strength-value': [9],
+                                     'dexterity-value': [9],
+                                     'constitution-value': [9],
+                                     'intelligence-value': [9],
+                                     'wisdom-value': [9],
+                                     'charisma-value': [9],
                                      'csrfmiddlewaretoken': csrf_token})
         self.assertIsInstance(response, HttpResponseRedirect)
+        character = Character.objects.get(character_name="Hrothgar")
+        self.assertEqual(AbilityScores.objects.filter(
+            character=character).count(), 6)
+
         response = csrf_client.get(response.url).render()
         self.assertEqual(response.status_code, 200)
-        # print(response.contents)
         self.assertContains(response, 'Hrothgar')
         self.assertNotContains(response, escape("['Hrothgar']"))
+        self.assertContains(response, AbilityScores.ability_score_mod(9))
+
+    def test_new_char_bad_validation(self):
+        """
+        Test that bad validation is handles properly.
+        """
+        response = self.client.post(reverse('new_character'),
+                                    {'character_name': ['Hrothgar'],
+                                     'alignment': ['ZZ'],
+                                     'strength-value': [9],
+                                     'dexterity-value': [9],
+                                     'constitution-value': [9],
+                                     'intelligence-value': [9],
+                                     'wisdom-value': [9],
+                                     'charisma-value': [9]})
+        self.assertEqual(response.status_code, 200)
+        with self.assertRaises(Character.DoesNotExist):
+            Character.objects.get(character_name="Hrothgar")
 
 
 class UserWithCharacterTests(TestCase):

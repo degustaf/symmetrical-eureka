@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^api/(?P<model>{})/(?P<method>{})$'.format(
         model_regex, attribute_regex),
         views.ClassMethodView.as_view(), name='SE_ClassMethod'),
-    url(r'^api/Character/(?P<Char_uuid>{})/(?P<attribute>{})$'.format(
+    url(r'^api/(?P<Char_uuid>{})/AbilityScores/(?P<attribute>{})$'.format(
         char_uuid_regex, attribute_regex),
         views.CharacterAtributeView.as_view(), name='SE_character_method'),
     url('', include(social_urls, namespace='social')),
