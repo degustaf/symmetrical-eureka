@@ -18,23 +18,34 @@ $(document).ready(function () {
         <form method="post" class="form">
             {% csrf_token %}
             <div class="row">
-                {% bootstrap_field form.character_name form_group_class="col-sm-9 col-xs-12" %}
-                {% bootstrap_field form.alignment form_group_class="col-sm-3 col-xs-12" %}
+                {% bootstrap_field character_form.character_name form_group_class="col-sm-9 col-xs-12" %}
+                {% bootstrap_field character_form.alignment form_group_class="col-sm-3 col-xs-12" %}
             </div>
+
             <fieldset class="toggle-border" id="ability-scores">
                 <legend>
                     <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
                     Ability Scores
                 </legend>
                 <div class="row">
-                    {% bs_ability_score_field form.strength %}
-                    {% bs_ability_score_field form.dexterity %}
-                    {% bs_ability_score_field form.constitution %}
-                    {% bs_ability_score_field form.intelligence %}
-                    {% bs_ability_score_field form.wisdom %}
-                    {% bs_ability_score_field form.charisma %}
+                    {% for abil_score in as_forms %}
+                        {% bs_ability_score_field abil_score.value %}
+                    {% endfor %}
                 </div>
             </fieldset>
+
+            <fieldset class="toggle-border" id="saving-throws">
+                <legend>
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                    Saving Throws
+                </legend>
+                <div class="row">
+                    {% for sav in sav_throw %}
+                        {% bs_saving_throw_display sav %}
+                    {% endfor %}
+                </div>
+            </fieldset>
+
             <button type="submit" class="btn btn-default">Submit</button>
         </form>
     </div>

@@ -16,7 +16,7 @@ function get_csrf_token() {
 }
 
 function adjust_mod(data, mod_id) {
-    var mod = data.ability_score_mod;
+    var mod = data;
     if(mod >= 0) {
         mod = "+" + mod;
     }
@@ -31,13 +31,18 @@ function toggle_fieldset() {
 
 function get_ability_score_mod() {
     var value = $(this).val();
+    var proficient_id = this.id.replace("_", "_sav_prof_").replace("-value", "");
+    var proficient = $("#" + proficient_id).hasClass("proficient");
     var mod_id = this.id.replace("_", "_mod_");
+    var sav_id = this.id.replace("_", "_sav_").replace("-value", "");
 
-    $.get("http://degustaf.pythonanywhere.com/SymmetricalEureka/api/Character/ability_score_mod",
-            {"ability_score": value})
+    $.get("http://degustaf.pythonanywhere.com/SymmetricalEureka/api/AbilityScores/ability_score_mod",
+            {"ability_score": value, "proficient": proficient})
         .done( function(data) {
-            adjust_mod(data, mod_id);
-        });
+            adjust_mod(data.ability_score_mod, mod_id);
+            adjust_mod(data.abs_saving_throw, sav_id);
+        })
+        .fail();
 }
 
 function toggle_p_with_input() {
@@ -48,16 +53,18 @@ function toggle_p_with_input() {
 function update_ability_score() {
     var ability_score = $(this).attr("name");
     var mod_id = this.id.replace("_", "_mod_");
-    var url = "http://degustaf.pythonanywhere.com/SymmetricalEureka/api/Character/" + $("#uuid").text() + "/" + ability_score;
+    var sav_id = this.id.replace("_", "_sav_");
+    var url = "http://degustaf.pythonanywhere.com/SymmetricalEureka/api/" + $("#uuid").text() + "/AbilityScores/" + ability_score;
     var p_elmnt = $("p#id_" + ability_score);
     var input_elmnt = $("input#id_" + ability_score);
 
-    var post_data = {'csrfmiddlewaretoken': get_csrf_token()};
-    post_data[ability_score] = $(this).val();
+    var post_data = {'csrfmiddlewaretoken': get_csrf_token(),
+                     'value': $(this).val()};
 
     $.post(url, post_data)
         .done(function(data) {
-            adjust_mod(data, mod_id);
+            adjust_mod(data.ability_score_mod, mod_id);
+            adjust_mod(data.saving_throw, sav_id);
         })
         .fail(function() {
             input_elmnt.val(p_elmnt.val());

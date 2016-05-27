@@ -5,13 +5,68 @@
     "fields": {
         "player": 1,
         "character_name": "Zeke",
-        "alignment": "CN",
-        "strength": 9,
-        "dexterity": 10,
-        "constitution": 12,
-        "intelligence": 15,
-        "wisdom": 3,
-        "charisma": 17
+        "alignment": "CN"
+    }
+},
+
+{
+    "model": "SymmetricalEureka.abilityscores",
+    "pk": 1,
+    "fields": {
+        "character": "00000000-0000-0000-0000-000000000000",
+        "which": "0_STR",
+        "value": 9,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.abilityscores",
+    "pk": 2,
+    "fields": {
+        "character": "00000000-0000-0000-0000-000000000000",
+        "which": "1_DEX",
+        "value": 10,
+        "proficient": true
+    }
+},
+{
+    "model": "SymmetricalEureka.abilityscores",
+    "pk": 3,
+    "fields": {
+        "character": "00000000-0000-0000-0000-000000000000",
+        "which": "2_CON",
+        "value": 12,
+        "proficient": true
+    }
+},
+{
+    "model": "SymmetricalEureka.abilityscores",
+    "pk": 4,
+    "fields": {
+        "character": "00000000-0000-0000-0000-000000000000",
+        "which": "3_INT",
+        "value": 15,
+        "proficient": true
+    }
+},
+{
+    "model": "SymmetricalEureka.abilityscores",
+    "pk": 5,
+    "fields": {
+        "character": "00000000-0000-0000-0000-000000000000",
+        "which": "4_WIS",
+        "value": 3,
+        "proficient": true
+    }
+},
+{
+    "model": "SymmetricalEureka.abilityscores",
+    "pk": 6,
+    "fields": {
+        "character": "00000000-0000-0000-0000-000000000000",
+        "which": "5_CHA",
+        "value": 17,
+        "proficient": true
     }
 }
 ]

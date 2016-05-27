@@ -5,7 +5,8 @@ Classes to test views code.
 
 from __future__ import unicode_literals
 
-from json import dumps
+from contextlib import contextmanager
+from json import loads
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse  # , resolve
@@ -13,7 +14,10 @@ from django.http import (HttpResponseBadRequest, HttpResponseForbidden,
                          HttpResponseNotFound, JsonResponse)
 from django.test import TestCase, Client
 
-from SymmetricalEureka.models import Character
+from six import exec_
+
+from SymmetricalEureka.models import AbilityScores, Character
+from SymmetricalEureka.views import ClassMethodView
 
 
 class OneUserGeneric(TestCase):
@@ -77,23 +81,50 @@ class TwoUsersWithCharacterGeneric(UserWithCharacterGeneric):
             self.client.login(username="Tim", password="password")
 
 
+@contextmanager
+def append_extra_method(method_as_string, method_name, extra_method=None):
+    """ Context manager for appending to ClassMethodView.extra_methods"""
+    old_method = getattr(ClassMethodView, method_name, None)
+    try:
+        delattr(ClassMethodView, method_name)
+    except AttributeError:
+        pass
+    if extra_method is not None:
+        setattr(ClassMethodView, method_name, extra_method)
+    ClassMethodView.extra_methods[method_as_string].append(method_name)
+
+    try:
+        yield
+    finally:
+        try:
+            delattr(ClassMethodView, method_name)
+        except AttributeError:
+            pass
+        if old_method is not None:
+            setattr(ClassMethodView, method_name, old_method)
+        ClassMethodView.extra_methods[method_as_string].pop()
+
+
 class TestJsonClassViews(TestCase):
     """ Test classmethods that repsond with JSON data."""
+
     def test_ability_score_mods(self):
         """Test Character.ability_score_mod()."""
         input_val = 18
-        output_val = Character.ability_score_mod(input_val)
+        output_val = AbilityScores.ability_score_mod(input_val)
+        sav = AbilityScores.abs_saving_throw(input_val, False)
         url = reverse('SE_ClassMethod',
-                      kwargs={'model': 'Character',
+                      kwargs={'model': 'AbilityScores',
                               'method': 'ability_score_mod'})
         url = '{}?ability_score={}'.format(url, input_val)
 
         response = self.client.get(url)
         self.assertIsInstance(response, JsonResponse)
 
-        expected_result = dumps({"ability_score_mod":
-                                 output_val}).encode('utf-8')
-        self.assertEqual(response.content, expected_result)
+        resp = loads(response.content.decode('utf-8'))
+        expected_result = {"ability_score_mod": output_val,
+                           "abs_saving_throw": sav}
+        self.assertEqual(resp, expected_result)
 
     def test_bad_class(self):
         """
@@ -135,11 +166,65 @@ class TestJsonClassViews(TestCase):
         the classmethod.
         """
         url = reverse('SE_ClassMethod',
-                      kwargs={'model': 'Character',
+                      kwargs={'model': 'AbilityScores',
                               'method': 'ability_score_mod'})
         url = '{}?i_dont_exist={}'.format(url, 0)
         response = self.client.get(url)
         self.assertIsInstance(response, HttpResponseBadRequest)
+
+    def test_method_bad_value(self):
+        """
+        Test that we get a 404 response if we pass an unexpected argument to
+        the classmethod.
+        """
+        url = reverse('SE_ClassMethod',
+                      kwargs={'model': 'AbilityScores',
+                              'method': 'ability_score_mod'})
+        url = '{}?ability_score={}'.format(url, '')
+        response = self.client.get(url)
+        self.assertIsInstance(response, HttpResponseBadRequest)
+
+    def test_class_not_model(self):
+        """ Test that view filters out non-model classes."""
+        url = reverse('SE_ClassMethod',
+                      kwargs={'model': 'MinValueValidator',
+                              'method': 'compare'})
+        response = self.client.get(url)
+        self.assertIsInstance(response, HttpResponseNotFound)
+
+    def test_class_bad_extra_method(self):
+        """ Test that view handles a bad extra_method."""
+        input_val = 18
+        url = reverse('SE_ClassMethod',
+                      kwargs={'model': 'AbilityScores',
+                              'method': 'ability_score_mod'})
+        url = '{}?ability_score={}'.format(url, input_val)
+        response = self.client.get(url)
+        expected_response = loads(response.content.decode('utf-8'))
+        expected_response['bad_method'] = None
+
+        with append_extra_method('ability_score_mod', 'bad_method'):
+            response = self.client.get(url)
+            self.assertEqual(expected_response,
+                             loads(response.content.decode('utf-8')))
+
+    def test_class_extra_method_errors(self):
+        """ Test that view handles a bad extra_method."""
+        input_val = 18
+        url = reverse('SE_ClassMethod',
+                      kwargs={'model': 'AbilityScores',
+                              'method': 'ability_score_mod'})
+        url = '{}?ability_score={}'.format(url, input_val)
+        response = self.client.get(url)
+        expected_response = loads(response.content.decode('utf-8'))
+        expected_response['bad_method'] = None
+
+        with append_extra_method('ability_score_mod', 'bad_method',
+                                 lambda: exec_('raise ValueError')):
+            response = self.client.get(url)
+            # pylint: disable=exec-used
+            self.assertEqual(expected_response,
+                             loads(response.content.decode('utf-8')))
 
 
 class JsonCharacterViewsTest(UserWithCharacterGeneric):
@@ -154,15 +239,17 @@ class JsonCharacterViewsTest(UserWithCharacterGeneric):
 
     def test_get_ability_score(self):
         """ Test """
-        self.assertEqual(self.url, "/api/Character/{}/strength".format(
+        self.assertEqual(self.url, "/api/{}/AbilityScores/strength".format(
             self.test_character.Char_uuid))
 
         response = self.client.get(self.url)
         self.assertIsInstance(response, JsonResponse)
 
-        expected_result = dumps({"strength":
-                                 self.test_character.strength}).encode('utf-8')
-        self.assertEqual(response.content, expected_result)
+        resp = loads(response.content.decode('utf-8'))
+        ability_score = AbilityScores.objects.get(
+            character=self.test_character, which='0_STR')
+        expected_result = {"strength": ability_score.value}
+        self.assertEqual(resp, expected_result)
 
     def test_get_as_requires_login(self):
         """ Test that you can't get ability score unless logged in."""
@@ -182,46 +269,48 @@ class JsonCharacterViewsTest(UserWithCharacterGeneric):
         response = self.client.get(url)
         self.assertIsInstance(response, HttpResponseNotFound)
 
-    def test_post_ability_score(self):
-        """ Test that we can post data to the db."""
-        val = 11
-        mod = Character.ability_score_mod(val)
-        response = self.client.post(self.url, {'strength': val})
-        self.assertIsInstance(response, JsonResponse)
-
-        expected_result = dumps({'strength': val,
-                                 'ability_score_mod': mod}).encode('utf-8')
-        self.assertEqual(response.content, expected_result)
-
     def test_post_as_attr_dont_match(self):
         """
         Test that if the attribute in the url doesn't match the POST data,
         we are returned a 404.
         """
-        response = self.client.post(self.url, {'constitution': 0})
+        response = self.client.post(self.url, {'i_dont_exist': 0})
         self.assertIsInstance(response, HttpResponseBadRequest)
+
+    def test_post_ability_score(self):
+        """ Test that we can post data to the db."""
+        val = 11
+        mod = AbilityScores.ability_score_mod(val)
+        sav = mod + 0
+        response = self.client.post(self.url, {'value': val})
+        self.assertIsInstance(response, JsonResponse)
+
+        resp = loads(response.content.decode('utf-8'))
+        expected_result = {'strength': val, 'ability_score_mod': mod,
+                           'saving_throw': sav}
+        self.assertEqual(resp, expected_result)
 
     def test_post_as_bad_data(self):
         """ Test that if bad data is posted, it returns a 404."""
-        response = self.client.post(self.url, {'strength': 'not a number'})
+        response = self.client.post(self.url, {'value': 'not a number'})
         self.assertIsInstance(response, HttpResponseBadRequest)
 
-        response = self.client.post(self.url, {'strength': -5})
+        response = self.client.post(self.url, {'value': -5})
         self.assertIsInstance(response, HttpResponseBadRequest)
 
         # max value is 25
-        response = self.client.post(self.url, {'strength': 35})
+        response = self.client.post(self.url, {'value': 35})
         self.assertIsInstance(response, HttpResponseBadRequest)
 
     def test_post_bad_as_404s(self):
         """
-        Test that attempts to post an ability score that doesn't exist returns
-        404.
+        Test that attempts to post an ability score that doesn't exist
+        returns 404.
         """
         url = reverse('SE_character_method',
                       kwargs={'Char_uuid': self.test_character.Char_uuid,
                               'attribute': 'i_dont_exist'})
-        response = self.client.post(url, {'i_dont_exist': 0})
+        response = self.client.post(url, {'value': 0})
         self.assertIsInstance(response, HttpResponseNotFound)
 
     def test_post_as_csrf(self):
@@ -239,14 +328,16 @@ class JsonCharacterViewsTest(UserWithCharacterGeneric):
         csrf_token = csrf_client.cookies['csrftoken'].value
         val = 11
         response = csrf_client.post(self.url,
-                                    {'strength': val,
+                                    {'value': val,
                                      'csrfmiddlewaretoken': csrf_token})
         self.assertIsInstance(response, JsonResponse)
 
-        mod = Character.ability_score_mod(val)
-        expected_result = dumps({'strength': val,
-                                 'ability_score_mod': mod}).encode('utf-8')
-        self.assertEqual(response.content, expected_result)
+        resp = loads(response.content.decode('utf-8'))
+        mod = AbilityScores.ability_score_mod(val)
+        sav = mod + 0
+        expected_result = {'strength': val, 'ability_score_mod': mod,
+                           'saving_throw': sav}
+        self.assertEqual(resp, expected_result)
 
 
 # pylint: disable=too-many-ancestors

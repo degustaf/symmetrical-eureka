@@ -5,13 +5,16 @@ Classes to test models code.
 
 from __future__ import unicode_literals
 
-from django.db.utils import IntegrityError
+# import pdb
+#         pdb.set_trace()
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 # from django.utils.html import format_html
 
-from SymmetricalEureka.models import Character
+from SymmetricalEureka.models import AbilityScores, Character
+from SymmetricalEureka.views import build_kwargs
 
 
 class CharacterTest(TestCase):
@@ -33,9 +36,7 @@ class CharacterTest(TestCase):
         Test ability to create Character
         """
         test_character = Character(player=self.test_user,
-                                   character_name="Hrothgar", alignment="CG",
-                                   strength=9, dexterity=9, constitution=9,
-                                   intelligence=9, wisdom=9, charisma=9)
+                                   character_name="Hrothgar", alignment="CG")
         # pylint: disable=no-member
         test_character.save()
         self.assertEqual(test_character.character_name, "Hrothgar")
@@ -47,9 +48,7 @@ class CharacterTest(TestCase):
         Test that unicode character name is handles properly.
         """
         test_character = Character(player=self.test_user,
-                                   character_name="Ráðormsdóttir",
-                                   strength=9, dexterity=9, constitution=9,
-                                   intelligence=9, wisdom=9, charisma=9)
+                                   character_name="Ráðormsdóttir")
         # pylint: disable=no-member
         test_character.save()
         self.assertEqual(test_character.character_name, "Ráðormsdóttir")
@@ -57,7 +56,6 @@ class CharacterTest(TestCase):
         # self.assertEqual(str(test_character), format_html("Ráðormsdóttir"))
 
 
-# pylint: disable=too-many-public-methods
 class TestCharacterAbilityScores(TestCase):
     """
     Test character fields by pulling from db.
@@ -68,110 +66,143 @@ class TestCharacterAbilityScores(TestCase):
     def setUpTestData(cls):
         """Initialize database for tests."""
         # pylint: disable=no-member
-        cls.test_user = User.objects.get(username="Mike")
         cls.test_character = Character.objects.get(character_name="Zeke")
 
-    def missing_ability_score_errors(self, ability_score):
-        """Test that model errors out if ability_score isn't present."""
-        setattr(self.test_character, ability_score, None)
-        # pylint: disable=no-member
-        with self.assertRaises(IntegrityError):
-            self.test_character.save()
-
-    def min_ability_score_value(self, ability_score):
-        """Test the ability_score has a minimum value of 1."""
-        setattr(self.test_character, ability_score, 0)
+    def test_max_ability_score(self):
+        """" Test that ability scores have a max value of 25."""
+        too_big = AbilityScores(character=self.test_character, which="0_STR",
+                                value=26)
         with self.assertRaises(ValidationError):
-            self.test_character.clean_fields()
+            # pylint: disable=no-member
+            too_big.clean_fields()
 
-    def max_ability_score_value(self, ability_score):
-        """Test the ability_score has a maximum value of 25."""
-        setattr(self.test_character, ability_score, 26)
+    def test_min_ability_score(self):
+        """" Test that ability scores have a min value of 1."""
+        too_small = AbilityScores(character=self.test_character, which="0_STR",
+                                  value=0)
         with self.assertRaises(ValidationError):
-            self.test_character.clean_fields()
+            # pylint: disable=no-member
+            too_small.clean_fields()
 
-    def test_missing_strength_errors(self):
-        """Test that model errors out if strength isn't present."""
-        self.missing_ability_score_errors("strength")
-
-    def test_min_strength_value(self):
-        """Test the strength has a minimum value of 1."""
-        self.min_ability_score_value("strength")
-
-    def test_max_strength_value(self):
-        """Test the strength has a maximum value of 25."""
-        self.max_ability_score_value("strength")
-
-    def test_missing_dexterity_errors(self):
-        """Test that model errors out if dexterity isn't present."""
-        self.missing_ability_score_errors("dexterity")
-
-    def test_min_dexterity_value(self):
-        """Test the dexterity has a minimum value of 1."""
-        self.min_ability_score_value("dexterity")
-
-    def test_max_dexterity_value(self):
-        """Test the dexterity has a maximum value of 25."""
-        self.max_ability_score_value("dexterity")
-
-    def test_missing_con_errors(self):
-        """Test that model errors out if constitution isn't present."""
-        self.missing_ability_score_errors("constitution")
-
-    def test_min_con_value(self):
-        """Test the constitution has a minimum value of 1."""
-        self.min_ability_score_value("constitution")
-
-    def test_max_con_value(self):
-        """Test the constitution has a maximum value of 25."""
-        self.max_ability_score_value("constitution")
-
-    def test_missing_int_errors(self):
-        """Test that model errors out if intelligence isn't present."""
-        self.missing_ability_score_errors("intelligence")
-
-    def test_min_int_value(self):
-        """Test the intelligence has a minimum value of 1."""
-        self.min_ability_score_value("intelligence")
-
-    def test_max_int_value(self):
-        """Test the intelligence has a maximum value of 25."""
-        self.max_ability_score_value("intelligence")
-
-    def test_missing_wisdom_errors(self):
-        """Test that model errors out if wisdom isn't present."""
-        self.missing_ability_score_errors("wisdom")
-
-    def test_min_wisdom_value(self):
-        """Test the wisdom has a minimum value of 1."""
-        self.min_ability_score_value("wisdom")
-
-    def test_max_wisdom_value(self):
-        """Test the wisdom has a maximum value of 25."""
-        self.max_ability_score_value("wisdom")
-
-    def test_missing_charisma_errors(self):
-        """Test that model errors out if charisma isn't present."""
-        self.missing_ability_score_errors("charisma")
-
-    def test_min_charisma_value(self):
-        """Test the charisma has a minimum value of 1."""
-        self.min_ability_score_value("charisma")
-
-    def test_max_charisma_value(self):
-        """Test the charisma has a maximum value of 25."""
-        self.max_ability_score_value("charisma")
+    def test_missing_ability_score(self):
+        """Test that model errors out if value isn't present."""
+        abil_score = AbilityScores(character=self.test_character,
+                                   which="0_STR")
+        with self.assertRaises(ValidationError):
+            # pylint: disable=no-member
+            abil_score.clean_fields()
 
 
-class TestiCharClassFunctions(TestCase):
+class TestAbilityScoreClassFunctions(TestCase):
     """
     Test Class functions of the Character Class.
     """
     def test_abil_score_mod(self):
-        """Test that ability score modifier works properly."""
-        self.assertEqual(Character.ability_score_mod(1), -5)
-        self.assertEqual(Character.ability_score_mod(3), -4)
-        self.assertEqual(Character.ability_score_mod(10), 0)
-        self.assertEqual(Character.ability_score_mod(18), 4)
-        self.assertEqual(Character.ability_score_mod(19), 4)
-        self.assertEqual(Character.ability_score_mod(20), 5)
+        """ Test that ability score modifier works properly."""
+        self.assertEqual(AbilityScores.ability_score_mod(1), -5)
+        self.assertEqual(AbilityScores.ability_score_mod(3), -4)
+        self.assertEqual(AbilityScores.ability_score_mod(10), 0)
+        self.assertEqual(AbilityScores.ability_score_mod(18), 4)
+        self.assertEqual(AbilityScores.ability_score_mod(19), 4)
+        self.assertEqual(AbilityScores.ability_score_mod(20), 5)
+
+    def test_abs_saving_throw(self):
+        """ Test abstract saving throw class method."""
+        self.assertEqual(AbilityScores.abs_saving_throw(18, False),
+                         AbilityScores.ability_score_mod(18))
+        self.assertEqual(AbilityScores.abs_saving_throw(14, True),
+                         AbilityScores.ability_score_mod(14) + 2)
+
+
+class TestAbilityScoresClass(TestCase):
+    """ Tests of the AbilityScores class."""
+    fixtures = ['user_mike.json', 'zeke.json']
+
+    @classmethod
+    def setUpTestData(cls):
+        """Initialize database for tests."""
+        # pylint: disable=no-member
+        cls.test_user = User.objects.get(username="Mike")
+        cls.test_character = Character.objects.get(character_name="Zeke")
+
+    def test_ability_score_fields(self):
+        """ Test that there are ability scores."""
+        ab_score = AbilityScores(character=self.test_character,
+                                 which=AbilityScores.WHICH_CHOICES[0][0],
+                                 value=12,
+                                 proficient=True)
+
+        # pylint: disable=no-member
+        ab_score.save()
+        self.assertEqual(ab_score.character, self.test_character)
+
+
+class TestCharacter(TestCase):
+    """ Tests of the AbilityScores class."""
+    fixtures = ['user_mike.json', 'zeke.json']
+
+    @classmethod
+    def setUpTestData(cls):
+        """Initialize database for tests."""
+        # pylint: disable=no-member
+        cls.test_character = Character.objects.get(character_name="Zeke")
+
+    def test_proficiency_bonus(self):
+        """ Test that proficiency bonus function works."""
+        bonus = self.test_character.proficiency_bonus
+        self.assertEqual(bonus, 2)
+
+    def test_saving_throw_not_prof(self):
+        """
+        Test that Saving throw returns ability score mod if not proficient.
+        """
+        ability_score = AbilityScores.objects.get(
+            character=self.test_character, which="0_STR")
+        ability_score.proficient = False
+        self.assertEqual(ability_score.saving_throw,
+                         AbilityScores.ability_score_mod(ability_score.value))
+
+    def test_saving_throw_prof(self):
+        """
+        Test that Saving throw returns ability score mod plus proficiency bonus
+        if proficient.
+        """
+        ability_score = AbilityScores.objects.get(
+            character=self.test_character, which="0_STR")
+        ability_score.proficient = True
+        self.assertEqual(ability_score.saving_throw,
+                         AbilityScores.ability_score_mod(ability_score.value)
+                         + ability_score.character.proficiency_bonus)
+
+
+class TestFunctions(TestCase):
+    """ Test Bare functions."""
+
+    def test_build_kwargs(self):
+        """ Test models.build_kwargs."""
+        data = {'func': 'func', 'data': 'data', 'rubbish': 'rubbish'}
+        self.assertEqual(build_kwargs(build_kwargs, data),
+                         {'func': 'func', 'data': 'data'})
+
+    def test_build_kwargs_method(self):
+        """ Test models.build_kwargs doesn't contain self."""
+        data = {'raw_password': 'raw_password', 'self': 'self',
+                'rubbish': 'rubbish'}
+        self.assertEqual(build_kwargs(User().check_password, data),
+                         {'raw_password': 'raw_password'})
+
+    def test_build_kwargs_class_method(self):
+        """ Test models.build_kwargs doesn't contain cls."""
+        data = {'cls': 'cls', 'ability_score': 'ability_score',
+                'proficient': 'proficient', 'rubbish': 'rubbish'}
+        self.assertEqual(build_kwargs(AbilityScores.abs_saving_throw, data),
+                         {'ability_score': 'ability_score',
+                          'proficient': 'proficient'})
+
+    def test_build_kwargs_no_args(self):
+        """ Test models.build_kwargs returns empty dict if no arguments."""
+        # pylint: disable=missing-docstring
+        def test_func():
+            pass
+        data = {'rubbish': 'rubbish'}
+        self.assertEqual(build_kwargs(test_func, data), {})
