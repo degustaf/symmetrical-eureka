@@ -78,6 +78,7 @@ BOOTSTRAP3 = {
     'field_renderers': {
         'default': 'bootstrap3.renderers.FieldRenderer',
         'inline': 'bootstrap3.renderers.InlineFieldRenderer',
+        'skills': 'SymmetricalEureka.renderers.SkillsFieldRenderer',
         'ability_scores':
             'SymmetricalEureka.renderers.AbilityScoreFieldRenderer',
         },

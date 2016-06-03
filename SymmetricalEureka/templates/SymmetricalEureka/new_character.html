@@ -6,6 +6,7 @@
 <script>
 $(document).ready(function () {
     $('div.ability-score-block input').focusout(get_ability_score_mod);
+    $('div.skills-block input').change(update_skills_bonus);
     })
 </script>
 {% endblock %}
@@ -42,6 +43,18 @@ $(document).ready(function () {
                 <div class="row">
                     {% for sav in sav_throw %}
                         {% bs_saving_throw_display sav %}
+                    {% endfor %}
+                </div>
+            </fieldset>
+
+            <fieldset class="toggle-border" id="skills">
+                <legend>
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                    Skills
+                </legend>
+                <div class="row">
+                    {% for skill in skills_forms %}
+                        {% bs_skills_field skill.proficient %}
                     {% endfor %}
                 </div>
             </fieldset>

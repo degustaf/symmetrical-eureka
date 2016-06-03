@@ -81,18 +81,75 @@ class AbilityScores(models.Model):
     @property
     def saving_throw(self):
         """ Compute Saving throw for this ability score."""
-        mod = AbilityScores.ability_score_mod(self.value)
-        if self.proficient:
-            return mod + self.character.proficiency_bonus
-        return mod
+        return self.abs_saving_throw(self.value,
+                                     self.proficient,
+                                     self.character.proficiency_bonus)
 
     @classmethod
-    def abs_saving_throw(cls, ability_score, proficient):
+    def abs_saving_throw(cls, ability_score, proficient, proficiency_bonus=2):
         """
         Compute Saving throw for abstract ability score, where proficient is a
         boolean for if the character is proficient in the ability score.
         """
         mod = AbilityScores.ability_score_mod(ability_score)
         if proficient and proficient != 'false':
-            return mod + 2
+            return mod + proficiency_bonus
         return mod
+
+    @classmethod
+    def abs_skills_bonus(cls, ability_score, which):
+        """
+        Identify all skills associated with 'which' and compute the bonus.
+        """
+        return {s: Skills.abs_bonus(ability_score, False, 2) for s in
+                Skills.ABILITY_SCORES_2_SKILLS.get(cls.WHICH_ENG_2_KEY[which],
+                                                   [])}
+
+
+class Skills(models.Model):
+    """ Model of Skills based on ability scores."""
+    SKILLS_2_ABILITY_SCORES = {'Acrobatics': '1_DEX',
+                               'Animal Handling': '4_WIS',
+                               'Arcana': '3_INT',
+                               'Athletics': '0_STR',
+                               'Deception': '5_CHA',
+                               'History': '3_INT',
+                               'Insight': '4_WIS',
+                               'Intimidation': '5_CHA',
+                               'Investigation': '3_INT',
+                               'Medicine': '4_WIS',
+                               'Nature': '3_INT',
+                               'Perception': '4_WIS',
+                               'Performance': '5_CHA',
+                               'Persuasion': '5_CHA',
+                               'Religion': '3_INT',
+                               'Sleight of Hand': '1_DEX',
+                               'Stealth': '1_DEX',
+                               'Survival': '4_WIS'}
+    CHOICES = sorted([(x, x) for x in SKILLS_2_ABILITY_SCORES.keys()])
+    ABILITY_SCORES_2_SKILLS = {}
+    for key, val in SKILLS_2_ABILITY_SCORES.items():
+        ABILITY_SCORES_2_SKILLS.setdefault(val, []).append(key)
+    which = models.CharField(max_length=15, choices=CHOICES)
+    ability_score = models.ForeignKey(AbilityScores, on_delete=models.CASCADE)
+    proficient = models.BooleanField(default=False)
+
+    @classmethod
+    def abs_bonus(cls, ability_score, proficient, proficiency_bonus):
+        """ Compute skill bonus for an abstract skill."""
+        mod = AbilityScores.ability_score_mod(ability_score)
+        if proficient:
+            return mod + proficiency_bonus
+        return mod
+
+    @property
+    def bonus(self):
+        """ Compute skill bonus."""
+        return self.abs_bonus(self.ability_score.value,
+                              self.proficient,
+                              self.ability_score.character.proficiency_bonus)
+
+        # mod = AbilityScores.ability_score_mod(self.ability_score.value)
+        # if self.proficient:
+        #     return mod + self.ability_score.character.proficiency_bonus
+        # return mod

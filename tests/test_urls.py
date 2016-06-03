@@ -4,18 +4,12 @@ Classes to test urls code.
 
 from uuid import uuid4
 
-# from django.contrib.auth.models import User
-# from django.contrib.auth.views import login
 from django.core.urlresolvers import resolve, reverse
 from django.test import TestCase
 from django.contrib.auth import views as auth_views
 from social.apps.django_app import views as social_views
 
 from SymmetricalEureka import views
-
-# For url testing class based views:
-# http://stackoverflow.com/questions/27320821/django-how-to-assert-url-pattern-resolves-to-correct-class-based-view-function
-# Or use pdb.setbreak.
 
 
 class UrlTest(TestCase):

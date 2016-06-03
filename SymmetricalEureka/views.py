@@ -2,6 +2,7 @@
 Views for SymmetricalEureka
 """
 
+from collections import OrderedDict
 from importlib import import_module
 try:
     from inspect import signature
@@ -26,8 +27,8 @@ except ImportError:
     from SymmetricalEureka.backports.django_contrib_auth_mixins import\
         LoginRequiredMixin, PermissionRequiredMixin
 
-from .models import AbilityScores, Character
-from .forms import AbilityScoresForm, CharacterForm
+from .models import AbilityScores, Character, Skills
+from .forms import AbilityScoresForm, CharacterForm, SkillsForm
 
 
 # pylint: disable=too-many-ancestors
@@ -131,13 +132,15 @@ class DisplayCharacterView(PlayerLoggedIn, DetailView):
 
 def build_kwargs(func, data):
     """ Build a dictionary of arguments for func out of data."""
-    return {x: data.get(x, None) for x in signature(func).parameters.keys()}
+    return {k: data.get(k, None if v.default == v.empty else v.default)
+            for k, v in signature(func).parameters.items()}
 
 
 class ClassMethodView(View):
     """ Class that exposes classmethods of Django models."""
     module = 'SymmetricalEureka.models'
-    extra_methods = {'ability_score_mod': ['abs_saving_throw']}
+    extra_methods = {'ability_score_mod': ['abs_saving_throw',
+                                           'abs_skills_bonus']}
 
     def get(self, request, *args, **kwargs):
         """ Handle get requests by passing arguments to classmethod."""
@@ -252,29 +255,67 @@ class NewCharacterView(PlayerLoggedIn, TemplateView):
             sav_throw = [AbilityScores(which=x[0])
                          for x in AbilityScores.WHICH_CHOICES]
             kwargs['sav_throw'] = sav_throw
+        if 'skills_forms' not in kwargs:
+            skills_forms = [SkillsForm(prefix=x[0], instance=Skills())
+                            for x in Skills.CHOICES]
+            kwargs['skills_forms'] = skills_forms
 
         return super(NewCharacterView, self).get_context_data(**kwargs)
 
     def post(self, request, *args, **kwargs):
         """ Handle POST requests."""
-        character_form = CharacterForm(request.POST, instance=Character())
-        as_forms = [AbilityScoresForm(request.POST, prefix=x[1],
-                                      instance=AbilityScores())
-                    for x in AbilityScores.WHICH_CHOICES]
-        if character_form.is_valid() and \
-                all([af.is_valid() for af in as_forms]):
-            character = character_form.save(commit=False)
-            character.player = self.request.user
-            character.save()
-
-            for as_form in as_forms:
-                ability_score = as_form.save(commit=False)
-                ability_score.character = character
-                ability_score.which = AbilityScores.WHICH_ENG_2_KEY[
-                    as_form.prefix]
-                ability_score.save()
-
-            return HttpResponseRedirect(character.get_absolute_url())
+        forms = self.get_forms(request.POST)
+        if self.is_valid(forms):
+            return self.form_valid(forms)
         else:
-            return self.render_to_response(self.get_context_data(
-                character_form=character_form, as_forms=as_forms))
+            return self.render_to_response(self.get_context_data(**forms))
+
+    def form_valid(self, forms):
+        """ Process forms after it is determined that they are valid."""
+        character = forms['character_form'].save(commit=False)
+        character.player = self.request.user
+        character.save()
+
+        ability_scores = {}
+        for as_form in forms['as_forms']:
+            key = AbilityScores.WHICH_ENG_2_KEY[as_form.prefix]
+            ability_scores[key] = as_form.save(commit=False)
+            ability_scores[key].character = character
+            ability_scores[key].which = key
+
+            ability_scores[key].save()
+
+        for skills_form in forms['skills_forms']:
+            skill = skills_form.save(commit=False)
+            skill.which = skills_form.prefix
+            key = Skills.SKILLS_2_ABILITY_SCORES[skills_form.prefix]
+            skill.ability_score = ability_scores[key]
+
+            skill.save()
+
+        return HttpResponseRedirect(character.get_absolute_url())
+
+    # pylint: disable=no-self-use
+    def get_forms(self, data):
+        """ Construct forms."""
+        response = OrderedDict()
+        response['character_form'] = CharacterForm(data, instance=Character())
+        response['as_forms'] = [AbilityScoresForm(data, prefix=x[1],
+                                                  instance=AbilityScores())
+                                for x in AbilityScores.WHICH_CHOICES]
+        response['skills_forms'] = [SkillsForm(data, prefix=x[0],
+                                               instance=Skills())
+                                    for x in Skills.CHOICES]
+        return response
+
+    def is_valid(self, forms_dict):
+        """ validate forms in forms_dict."""
+        for item in forms_dict.values():
+            if isinstance(item, list):
+                if not all([x.is_valid() for x in item]):
+                    return False
+            else:
+                if not item.is_valid():
+                    return False
+
+        return True

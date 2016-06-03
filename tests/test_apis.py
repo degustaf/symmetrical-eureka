@@ -116,14 +116,15 @@ class TestJsonClassViews(TestCase):
         url = reverse('SE_ClassMethod',
                       kwargs={'model': 'AbilityScores',
                               'method': 'ability_score_mod'})
-        url = '{}?ability_score={}'.format(url, input_val)
+        url = '{}?ability_score={}&which={}'.format(url, input_val, "strength")
 
         response = self.client.get(url)
         self.assertIsInstance(response, JsonResponse)
 
         resp = loads(response.content.decode('utf-8'))
         expected_result = {"ability_score_mod": output_val,
-                           "abs_saving_throw": sav}
+                           "abs_saving_throw": sav,
+                           "abs_skills_bonus": {"Athletics": output_val}}
         self.assertEqual(resp, expected_result)
 
     def test_bad_class(self):
@@ -133,7 +134,7 @@ class TestJsonClassViews(TestCase):
         url = reverse('SE_ClassMethod',
                       kwargs={'model': 'IDontExist',
                               'method': 'ability_score_mod'})
-        url = '{}?ability_score={}'.format(url, 0)
+        url = '{}?ability_score={}&which={}'.format(url, 0, "strength")
         response = self.client.get(url)
         self.assertIsInstance(response, HttpResponseNotFound)
 
@@ -144,7 +145,7 @@ class TestJsonClassViews(TestCase):
         url = reverse('SE_ClassMethod',
                       kwargs={'model': 'Character',
                               'method': 'i_dont_exist'})
-        url = '{}?ability_score={}'.format(url, 0)
+        url = '{}?ability_score={}&which={}'.format(url, 0, "strength")
         response = self.client.get(url)
         self.assertIsInstance(response, HttpResponseNotFound)
 
@@ -198,7 +199,7 @@ class TestJsonClassViews(TestCase):
         url = reverse('SE_ClassMethod',
                       kwargs={'model': 'AbilityScores',
                               'method': 'ability_score_mod'})
-        url = '{}?ability_score={}'.format(url, input_val)
+        url = '{}?ability_score={}&which={}'.format(url, input_val, "strength")
         response = self.client.get(url)
         expected_response = loads(response.content.decode('utf-8'))
         expected_response['bad_method'] = None
@@ -214,7 +215,7 @@ class TestJsonClassViews(TestCase):
         url = reverse('SE_ClassMethod',
                       kwargs={'model': 'AbilityScores',
                               'method': 'ability_score_mod'})
-        url = '{}?ability_score={}'.format(url, input_val)
+        url = '{}?ability_score={}&which={}'.format(url, input_val, "strength")
         response = self.client.get(url)
         expected_response = loads(response.content.decode('utf-8'))
         expected_response['bad_method'] = None

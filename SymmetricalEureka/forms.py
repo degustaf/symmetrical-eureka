@@ -19,3 +19,10 @@ class AbilityScoresForm(ModelForm):
     class Meta:
         model = models.AbilityScores
         fields = ['value']
+
+
+class SkillsForm(ModelForm):
+    """ ModelForm for models.Skills."""
+    class Meta:
+        model = models.Skills
+        fields = ['proficient']

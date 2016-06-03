@@ -68,5 +68,168 @@
         "value": 17,
         "proficient": true
     }
+},
+
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 1,
+    "fields": {
+        "which": "Acrobatics",
+        "ability_score": 2,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 2,
+    "fields": {
+        "which": "Animal Handling",
+        "ability_score": 5,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 3,
+    "fields": {
+        "which": "Arcana",
+        "ability_score": 4,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 4,
+    "fields": {
+        "which": "Athletics",
+        "ability_score": 1,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 5,
+    "fields": {
+        "which": "Deception",
+        "ability_score": 6,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 6,
+    "fields": {
+        "which": "History",
+        "ability_score": 4,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 7,
+    "fields": {
+        "which": "Insight",
+        "ability_score": 5,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 8,
+    "fields": {
+        "which": "Intimidation",
+        "ability_score": 6,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 9,
+    "fields": {
+        "which": "Investigation",
+        "ability_score": 4,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 10,
+    "fields": {
+        "which": "Medicine",
+        "ability_score": 5,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 11,
+    "fields": {
+        "which": "Nature",
+        "ability_score": 4,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 12,
+    "fields": {
+        "which": "Perception",
+        "ability_score": 5,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 13,
+    "fields": {
+        "which": "Performance",
+        "ability_score": 6,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 14,
+    "fields": {
+        "which": "Persuasion",
+        "ability_score": 6,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 15,
+    "fields": {
+        "which": "Religion",
+        "ability_score": 4,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 16,
+    "fields": {
+        "which": "Sleight of Hand",
+        "ability_score": 2,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 17,
+    "fields": {
+        "which": "Stealth",
+        "ability_score": 2,
+        "proficient": false
+    }
+},
+{
+    "model": "SymmetricalEureka.skills",
+    "pk": 18,
+    "fields": {
+        "which": "Survival",
+        "ability_score": 5,
+        "proficient": false
+    }
 }
 ]

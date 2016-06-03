@@ -5,15 +5,11 @@ Classes to test models code.
 
 from __future__ import unicode_literals
 
-# import pdb
-#         pdb.set_trace()
-
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-# from django.utils.html import format_html
 
-from SymmetricalEureka.models import AbilityScores, Character
+from SymmetricalEureka.models import AbilityScores, Character, Skills
 from SymmetricalEureka.views import build_kwargs
 
 
@@ -174,6 +170,32 @@ class TestCharacter(TestCase):
                          AbilityScores.ability_score_mod(ability_score.value)
                          + ability_score.character.proficiency_bonus)
 
+    def test_skill_bonus_not_prof(self):
+        """
+        Test that skill bonus returns ability score mod if not proficient.
+        """
+        ability_score = AbilityScores.objects.get(
+            character=self.test_character, which="0_STR")
+        skill = Skills.objects.get(ability_score=ability_score,
+                                   which="Athletics")
+        skill.proficient = False
+        self.assertEqual(skill.bonus,
+                         AbilityScores.ability_score_mod(ability_score.value))
+
+    def test_skill_bonus_prof(self):
+        """
+        Test that skill bonus returns ability score mod plus proficiency bonus
+        if proficient.
+        """
+        ability_score = AbilityScores.objects.get(
+            character=self.test_character, which="0_STR")
+        skill = Skills.objects.get(ability_score=ability_score,
+                                   which="Athletics")
+        skill.proficient = True
+        self.assertEqual(skill.bonus,
+                         AbilityScores.ability_score_mod(ability_score.value)
+                         + self.test_character.proficiency_bonus)
+
 
 class TestFunctions(TestCase):
     """ Test Bare functions."""
@@ -197,12 +219,11 @@ class TestFunctions(TestCase):
                 'proficient': 'proficient', 'rubbish': 'rubbish'}
         self.assertEqual(build_kwargs(AbilityScores.abs_saving_throw, data),
                          {'ability_score': 'ability_score',
-                          'proficient': 'proficient'})
+                          'proficient': 'proficient',
+                          'proficiency_bonus': 2})
 
     def test_build_kwargs_no_args(self):
         """ Test models.build_kwargs returns empty dict if no arguments."""
-        # pylint: disable=missing-docstring
-        def test_func():
-            pass
+        test_func = lambda: None
         data = {'rubbish': 'rubbish'}
         self.assertEqual(build_kwargs(test_func, data), {})

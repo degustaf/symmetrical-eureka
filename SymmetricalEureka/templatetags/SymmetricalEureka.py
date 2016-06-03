@@ -3,6 +3,7 @@ Specialized template tags.
 """
 
 
+# from pdb import set_trace
 from django import template
 from django.utils.html import format_html
 
@@ -15,12 +16,6 @@ def _bs_ability_score_field(*args, **kwargs):
     """
     Wrapper around bootstrap_field with ability score arguments.
     """
-    # if "form_group_class" in kwargs:
-    #     kwargs["form_group_class"] = "col-sm-2 col-xs-4 value-block"\
-    #         + kwargs["form_group_class"]
-    # else:
-    #     kwargs["form_group_class"] = "col-sm-2 col-xs-4 value-block"
-
     kwargs["form_group_class"] = "col-sm-2 col-xs-4 value-block" +\
         " ability-score-block"
     kwargs["addon_after"] = " "
@@ -29,11 +24,22 @@ def _bs_ability_score_field(*args, **kwargs):
     return render_field(*args, **kwargs)
 
 
+def _bs_skills_field(*args, **kwargs):
+    """
+    Wrapper around bootstrap_field with skills arguments.
+    """
+    kwargs["form_group_class"] = "col-sm-2 col-xs-4 value-block" +\
+        " skills-block"
+    kwargs["addon_before"] = " "
+    kwargs["layout"] = "skills"
+
+    return render_field(*args, **kwargs)
+
+
 def _bs_ability_score_display(ability_score):
     """
     Render an html element to display field.
     """
-    # pylint: disable=protected-access
     field = AbilityScores.WHICH_KEY_2_ENG[ability_score.which]
     val = ability_score.value
     mod = "{:+d}".format(AbilityScores.ability_score_mod(val))
@@ -62,7 +68,6 @@ def _bs_saving_throw_display(ability_score):
     """
     Render an html element to display field.
     """
-    # pylint: disable=protected-access
     field = AbilityScores.WHICH_KEY_2_ENG[ability_score.which]
     val = "{:+d}".format(ability_score.saving_throw)\
         if ability_score.value else ""
@@ -104,3 +109,9 @@ def bs_ability_score_display(ability_score):
 def bs_saving_throw_display(ability_score):
     """ Wrapper around _bs_saving_throw_display for templates."""
     return _bs_saving_throw_display(ability_score)
+
+
+@register.simple_tag
+def bs_skills_field(skill):
+    """ Wrapper around _bs_skills_field for templates."""
+    return _bs_skills_field(skill)

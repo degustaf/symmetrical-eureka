@@ -41,7 +41,8 @@ div.value-block > div{
     display: block;
 }
 
-.ability-score-mod {
+.ability-score-mod,
+.skills-mod {
     display: inline-block;
     min-width: 25px;
     min-height: 22px;
@@ -79,4 +80,9 @@ div.value-block > div{
 
 p.sav-score {
     height: 20px;
+}
+
+.checkbox input[type=checkbox] {
+    position: static;
+    margin-left: 0;
 }

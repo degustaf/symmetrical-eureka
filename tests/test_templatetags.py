@@ -13,7 +13,7 @@ from django.test import TestCase
 
 from SymmetricalEureka.models import AbilityScores, Character
 from SymmetricalEureka.templatetags.SymmetricalEureka import\
-    _bs_ability_score_display  # _bs_ability_score_field
+    _bs_ability_score_display
 
 
 class AbilityScoreDisplayTest(TestCase):

@@ -11,7 +11,7 @@ from django.http import HttpResponseRedirect
 from django.test import TestCase, Client
 from django.utils.html import escape
 
-from SymmetricalEureka.models import AbilityScores, Character
+from SymmetricalEureka.models import AbilityScores, Character, Skills
 
 
 class NoUserTests(TestCase):
@@ -111,20 +111,24 @@ class OneUserTests(TestCase):
             csrf_client.login(username="Mike", password="password")
         response = csrf_client.get(reverse('new_character'))
         csrf_token = csrf_client.cookies['csrftoken'].value
-        response = csrf_client.post(reverse('new_character'),
-                                    {'character_name': ['Hrothgar'],
-                                     'alignment': ['CG'],
-                                     'strength-value': [9],
-                                     'dexterity-value': [9],
-                                     'constitution-value': [9],
-                                     'intelligence-value': [9],
-                                     'wisdom-value': [9],
-                                     'charisma-value': [9],
-                                     'csrfmiddlewaretoken': csrf_token})
+        data = {'character_name': ['Hrothgar'],
+                'alignment': ['CG'],
+                'strength-value': [9],
+                'dexterity-value': [9],
+                'constitution-value': [9],
+                'intelligence-value': [9],
+                'wisdom-value': [9],
+                'charisma-value': [9],
+                'csrfmiddlewaretoken': csrf_token}
+        data.update({x: False for x in Skills.SKILLS_2_ABILITY_SCORES.keys()})
+
+        response = csrf_client.post(reverse('new_character'), data)
         self.assertIsInstance(response, HttpResponseRedirect)
         character = Character.objects.get(character_name="Hrothgar")
         self.assertEqual(AbilityScores.objects.filter(
-            character=character).count(), 6)
+            character=character).count(), len(AbilityScores.WHICH_CHOICES))
+        self.assertEqual(Skills.objects.filter(
+            ability_score__character=character).count(), len(Skills.CHOICES))
 
         response = csrf_client.get(response.url).render()
         self.assertEqual(response.status_code, 200)
