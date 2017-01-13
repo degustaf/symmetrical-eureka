@@ -29,7 +29,7 @@ CLASSIFIERS = [
 
 INSTALL_REQUIREMENTS = [
     'Django>=1.8,<1.10',
-    'python-social-auth>=0.2',
+    'social-auth-app-django',
     'django-bootstrap3>=7.0'
     ]
 

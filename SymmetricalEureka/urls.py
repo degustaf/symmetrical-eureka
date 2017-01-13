@@ -4,7 +4,7 @@ SymmetricalEureka URL Configuration
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth import urls as auth_urls
-from social.apps.django_app import urls as social_urls
+from social_django import urls as social_urls
 from SymmetricalEureka import views
 
 
