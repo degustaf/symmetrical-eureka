@@ -123,11 +123,18 @@ class DisplayCharacterView(PlayerLoggedIn, DetailView):
 
     def get_context_data(self, **kwargs):
         kwargs['ability_scores'] = self.get_ability_scores()
+        kwargs['skills'] = self.get_skills(kwargs['ability_scores'])
         return super(DisplayCharacterView, self).get_context_data(**kwargs)
 
     def get_ability_scores(self):
-        """ generate a list of the ability scores for the character."""
+        """ Generate a list of the ability scores for the character."""
         return AbilityScores.objects.filter(character=self.player_character)
+
+    # pylint: disable=no-self-use
+    def get_skills(self, ability_scores):
+        """ Generate a list of skills for the character."""
+        return Skills.objects.filter(
+            ability_score__in=ability_scores).order_by('which')
 
 
 def build_kwargs(func, data):

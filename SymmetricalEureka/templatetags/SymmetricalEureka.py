@@ -89,6 +89,30 @@ def _bs_saving_throw_display(ability_score):
     return html
 
 
+def _bs_skill_display(skill):
+    """
+    Render an html element to display field.
+    """
+    field = skill.which
+    val = "{:+d}".format(skill.bonus)
+    prof = "proficient" if skill.proficient else "unproficient"
+
+    html = format_html("""<div class="col-sm-2 col-xs-4 value-block">
+                    <div>
+                        <label class="control-label" for="id_skill_{name}">
+                            {}
+                        </label>
+                    <p class="sav-score" id="id_skill_{name}">{val}</p>
+                    <div class="as-mod-padding">
+                        <p class="{}" id="id_skill_prof_{name}"></p>
+                    </div></div></div>""",
+                       field,
+                       prof,
+                       val=val,
+                       name=skill.id_name)
+    return html
+
+
 # pylint: disable=invalid-name
 register = template.Library()
 
@@ -115,3 +139,9 @@ def bs_saving_throw_display(ability_score):
 def bs_skills_field(skill):
     """ Wrapper around _bs_skills_field for templates."""
     return _bs_skills_field(skill)
+
+
+@register.simple_tag
+def bs_skill_display(skill):
+    """ Wrapper around _bs_skill_display for templates."""
+    return _bs_skill_display(skill)

@@ -3,6 +3,7 @@
 Django Models
 """
 from __future__ import unicode_literals, division
+from re import sub
 from uuid import uuid4
 
 from django.conf import settings
@@ -149,7 +150,7 @@ class Skills(models.Model):
                               self.proficient,
                               self.ability_score.character.proficiency_bonus)
 
-        # mod = AbilityScores.ability_score_mod(self.ability_score.value)
-        # if self.proficient:
-        #     return mod + self.ability_score.character.proficiency_bonus
-        # return mod
+    @property
+    def id_name(self):
+        """ Create a name that is valid for use as an html id."""
+        return sub(' ', '_', self.which)

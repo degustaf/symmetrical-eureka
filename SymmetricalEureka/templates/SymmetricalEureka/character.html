@@ -44,5 +44,17 @@ $(document).ready(function () {
         </div>
     </fieldset>
 
+    <fieldset class="toggle-border" id="saving-throws">
+        <legend>
+            <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+            Skills
+        </legend>
+        <div class="row">
+            {% for skill in skills %}
+                {% bs_skill_display skill %}
+            {% endfor %}
+        </div>
+    </fieldset>
+
 </div>
 {% endblock %}
