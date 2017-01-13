@@ -33,8 +33,6 @@ matrix:
     - python: 3.5
       env: TOXENV=py35-djangodev
     - python: 3.6
-      env: TOXENV=py36-django18
-    - python: 3.6
       env: TOXENV=py36-django19
     - python: 3.6
       env: TOXENV=py36-django110
@@ -49,20 +47,16 @@ matrix:
     - python: pypy
       env: TOXENV=pypy-djangodev
     - python: 3.7-dev
-      env: TOXENV=pydev-django18
-    - python: 3.7-dev
       env: TOXENV=pydev-django19
     - python: 3.7-dev
       env: TOXENV=pydev-django110
     - python: 3.7-dev
       env: TOXENV=pydev-djangodev
     - python: nightly
-      env: TOXENV=pyovernight-django18
-    - python: nightly
       env: TOXENV=pyovernight-django19
     - python: nightly
       env: TOXENV=pyovernight-djangodev
-    - python: 3.6
+    - python: 3.5
       env: TOXENV=lint
     - python: 3.6
       env: TOXENV=coverage
@@ -79,22 +73,18 @@ matrix:
     - python: pypy
       env: TOXENV=pypy-djangodev
     - python: 3.7-dev
-      env: TOXENV=pydev-django18
-    - python: 3.7-dev
       env: TOXENV=pydev-django19
     - python: 3.7-dev
       env: TOXENV=pydev-django110
     - python: 3.7-dev
       env: TOXENV=pydev-djangodev
     - python: nightly
-      env: TOXENV=pyovernight-django18
-    - python: nightly
       env: TOXENV=pyovernight-django19
     - python: nightly
       env: TOXENV=pyovernight-django110
     - python: nightly
       env: TOXENV=pyovernight-djangodev
-    - python: 3.6
+    - python: 3.5
       env: TOXENV=lint
     - python: 3.6
       env: TOXENV=coverage

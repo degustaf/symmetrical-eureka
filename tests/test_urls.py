@@ -9,7 +9,7 @@ from uuid import uuid4
 from django.core.urlresolvers import resolve, reverse
 from django.test import TestCase
 from django.contrib.auth import views as auth_views
-from social.apps.django_app import views as social_views
+from social_django import views as social_views
 
 from SymmetricalEureka import views
 
