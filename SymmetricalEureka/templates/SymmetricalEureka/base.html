@@ -26,6 +26,7 @@
               <span class="icon-bar"></span> 
             </button>
             <a class="navbar-brand" href="{% url 'SE_home' %}">SymmetricalEureka</a>
+            <a class="nav navbar-nav" href="{% url 'SE_spell_list' %}">Spell Database</a>
           </div>
           <div class="collapse navbar-collapse" id="myNavbar">
             {% if user and not user.is_anonymous %}

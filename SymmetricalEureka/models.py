@@ -96,3 +96,58 @@ class AbilityScores(models.Model):
         if proficient and proficient != 'false':
             return mod + 2
         return mod
+
+
+class SpellListing(models.Model):
+    """ Class of Spell listing."""
+    name = models.CharField(max_length=256, primary_key=True)
+    page = models.CharField(max_length=10, default='')
+    spell_range = models.CharField(max_length=256, default='')
+    duration = models.CharField(max_length=256, default='')
+    casting_time = models.CharField(max_length=256, default='')
+
+    concentration = models.BooleanField(default=False)
+    ritual = models.BooleanField(default=False)
+
+    level = models.PositiveSmallIntegerField(
+        default=0,
+        validators=[MinValueValidator(1),
+                    MaxValueValidator(25)])
+
+    description = models.TextField(default='')
+    material_components = models.TextField(default='')
+
+    components = models.CharField(max_length=3,
+                                  default='',
+                                  choices=(('', 'None'),
+                                           ('V', 'Verbal'),
+                                           ('S', 'Somatic'),
+                                           ('M', 'Material'),
+                                           ('VS', 'VS'),
+                                           ('VM', 'VM'),
+                                           ('SM', 'SM'),
+                                           ('VSM', 'VSM')))
+
+    school = models.CharField(max_length=256,
+                              choices=(('ab', 'Abjuration'),
+                                       ('cj', 'Conjuration'),
+                                       ('dv', 'Divination'),
+                                       ('en', 'Enchantment'),
+                                       ('ev', 'Evocation'),
+                                       ('il', 'Illusion'),
+                                       ('ne', 'Necromancy'),
+                                       ('tr', 'Transmutation')))
+
+
+class SpellClasses(models.Model):
+    """ Class to contain which classes can select which spells."""
+    spell = models.ForeignKey(SpellListing, on_delete=models.CASCADE)
+    caster_class = models.CharField(max_length=3,
+                                    choices=(('bd', 'Bard'),
+                                             ('cl', 'Cleric'),
+                                             ('dr', 'Druid'),
+                                             ('pd', 'Paladin'),
+                                             ('rg', 'Ranger'),
+                                             ('sc', 'Sorcerer'),
+                                             ('wa', 'Warlock'),
+                                             ('wi', 'Wizard')))

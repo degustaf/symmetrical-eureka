@@ -59,3 +59,10 @@ class UrlTest(TestCase):
         """
         found = resolve(reverse('new_character'))
         self.assertEqual(found.func.__name__, views.NewCharacterView.__name__)
+
+    def test_spell_list_url_resolves(self):
+        """
+        Test that spell list url resolves.
+        """
+        found = resolve(reverse('SE_spell_list'))
+        self.assertEqual(found.func.__name__, views.SpellListView.__name__)

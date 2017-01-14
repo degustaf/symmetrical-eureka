@@ -1,0 +1,23 @@
+{% extends 'SymmetricalEureka/base.html' %}
+{% load bootstrap3 %}
+{% load SymmetricalEureka %}
+
+{% block script %}
+{% endblock %}
+
+{% block main %}
+<div>
+    <h2>Spells</h2>
+
+    <table>
+        <tr>
+            <th>Name</th>
+        </tr>
+        {% for spell in object_list %}
+            <tr>
+                <td>{{ spell.name }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

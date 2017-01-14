@@ -15,7 +15,7 @@ from django.db.models import base
 from django.http import (Http404, HttpResponseBadRequest, HttpResponseRedirect,
                          JsonResponse)
 from django.utils.datastructures import MultiValueDictKeyError
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView, View
 from django.views.generic.detail import BaseDetailView
 
@@ -26,7 +26,7 @@ except ImportError:
     from SymmetricalEureka.backports.django_contrib_auth_mixins import\
         LoginRequiredMixin, PermissionRequiredMixin
 
-from .models import AbilityScores, Character
+from .models import AbilityScores, Character, SpellListing
 from .forms import AbilityScoresForm, CharacterForm
 
 
@@ -278,3 +278,15 @@ class NewCharacterView(PlayerLoggedIn, TemplateView):
         else:
             return self.render_to_response(self.get_context_data(
                 character_form=character_form, as_forms=as_forms))
+
+
+class SpellListView(ListView):
+    """
+    Class for the view to display Spells.
+    """
+
+    model = SpellListing
+    template_name = 'SymmetricalEureka/spell_list.html'
+
+    def get_queryset(self):
+        return SpellListing.objects.order_by('name')

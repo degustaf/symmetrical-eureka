@@ -10,10 +10,11 @@ from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.test import TestCase
 # from django.utils.html import format_html
 
-from SymmetricalEureka.models import AbilityScores, Character
+from SymmetricalEureka.models import AbilityScores, Character, SpellListing
 from SymmetricalEureka.views import build_kwargs
 
 
@@ -206,3 +207,14 @@ class TestFunctions(TestCase):
             pass
         data = {'rubbish': 'rubbish'}
         self.assertEqual(build_kwargs(test_func, data), {})
+
+
+class TestSpellListing(TestCase):
+    """ Test of SpellListing model."""
+
+    fixtures = ['spell_data.json']
+
+    def test_fields(self):
+        """ Test that fields exist and are of the desired type."""
+        instance = SpellListing()
+        self.assertTrue(hasattr(instance, 'name'))
