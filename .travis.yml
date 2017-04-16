@@ -15,6 +15,8 @@ matrix:
     - python: 2.7
       env: TOXENV=py27-django110
     - python: 2.7
+      env: TOXENV=py27-django111
+    - python: 2.7
       env: TOXENV=py27-djangodev
     - python: 3.4
       env: TOXENV=py34-django18
@@ -22,6 +24,8 @@ matrix:
       env: TOXENV=py34-django19
     - python: 3.4
       env: TOXENV=py34-django110
+    - python: 3.4
+      env: TOXENV=py34-django111
     - python: 3.4
       env: TOXENV=py34-djangodev
     - python: 3.5
@@ -31,11 +35,15 @@ matrix:
     - python: 3.5
       env: TOXENV=py35-django110
     - python: 3.5
+      env: TOXENV=py35-django111
+    - python: 3.5
       env: TOXENV=py35-djangodev
     - python: 3.6
       env: TOXENV=py36-django19
     - python: 3.6
       env: TOXENV=py36-django110
+    - python: 3.6
+      env: TOXENV=py36-django111
     - python: 3.6
       env: TOXENV=py36-djangodev
     - python: pypy
@@ -45,18 +53,26 @@ matrix:
     - python: pypy
       env: TOXENV=pypy-django110
     - python: pypy
+      env: TOXENV=pypy-django111
+    - python: pypy
       env: TOXENV=pypy-djangodev
     - python: 3.7-dev
       env: TOXENV=pydev-django19
     - python: 3.7-dev
       env: TOXENV=pydev-django110
     - python: 3.7-dev
+      env: TOXENV=pydev-django111
+    - python: 3.7-dev
       env: TOXENV=pydev-djangodev
     - python: nightly
       env: TOXENV=pyovernight-django19
     - python: nightly
+      env: TOXENV=pyovernight-django110
+    - python: nightly
+      env: TOXENV=pyovernight-django111
+    - python: nightly
       env: TOXENV=pyovernight-djangodev
-    - python: 3.5
+    - python: 3.6
       env: TOXENV=lint
     - python: 3.6
       env: TOXENV=coverage
@@ -77,14 +93,18 @@ matrix:
     - python: 3.7-dev
       env: TOXENV=pydev-django110
     - python: 3.7-dev
+      env: TOXENV=pydev-django111
+    - python: 3.7-dev
       env: TOXENV=pydev-djangodev
     - python: nightly
       env: TOXENV=pyovernight-django19
     - python: nightly
       env: TOXENV=pyovernight-django110
     - python: nightly
+      env: TOXENV=pyovernight-django111
+    - python: nightly
       env: TOXENV=pyovernight-djangodev
-    - python: 3.5
+    - python: 3.6
       env: TOXENV=lint
     - python: 3.6
       env: TOXENV=coverage

@@ -150,11 +150,3 @@ class SpellClasses(models.Model):
     """ Class to contain which classes can select which spells."""
     spell = models.ForeignKey(SpellListing, on_delete=models.CASCADE)
     caster_class = models.CharField(max_length=3, choices=CASTER_CLASSES)
-
-
-@python_2_unicode_compatible
-class UserSpells(models.Model):
-    """ Class to join users to spells."""
-    player = models.ForeignKey(settings.AUTH_USER_MODEL,
-                               on_delete=models.CASCADE)
-    spell = models.ForeignKey(SpellListing, on_delete=models.CASCADE)

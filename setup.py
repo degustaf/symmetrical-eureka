@@ -17,6 +17,7 @@ CLASSIFIERS = [
     'Framework :: Django :: 1.8',
     'Framework :: Django :: 1.9',
     'Framework :: Django :: 1.10',
+    'Framework :: Django :: 1.11',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT',
     'Operating System :: OS Independent',
@@ -24,15 +25,16 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ]
 
 INSTALL_REQUIREMENTS = [
-    'Django>=1.8,<1.11',
+    'Django>=1.8,<1.12',
     'social-auth-app-django',
-    'django-bootstrap3>=7.0'
-    'djangorestframework'
+    'django-bootstrap3>=7.0',
+    'djangorestframework>=3.6',
     ]
 
 setup(
