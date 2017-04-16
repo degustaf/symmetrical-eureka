@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=missing-docstring
 """
 Django Models
 """
@@ -98,6 +99,17 @@ class AbilityScores(models.Model):
         return mod
 
 
+COMPONENTS = [('', 'None'), ('V', 'Verbal'), ('S', 'Somatic'),
+              ('M', 'Material'), ('VS', 'Verbal, Somatic'),
+              ('VM', 'Verbal, Material'), ('SM', 'Somatic, Material'),
+              ('VSM', 'Verbal, Somatic, Material')]
+
+SCHOOLS = [('ab', 'Abjuration'), ('cj', 'Conjuration'), ('dv', 'Divination'),
+           ('en', 'Enchantment'), ('ev', 'Evocation'), ('il', 'Illusion'),
+           ('ne', 'Necromancy'), ('tr', 'Transmutation')]
+
+
+@python_2_unicode_compatible
 class SpellListing(models.Model):
     """ Class of Spell listing."""
     name = models.CharField(max_length=256, primary_key=True)
@@ -111,43 +123,38 @@ class SpellListing(models.Model):
 
     level = models.PositiveSmallIntegerField(
         default=0,
-        validators=[MinValueValidator(1),
-                    MaxValueValidator(25)])
+        validators=[MinValueValidator(0),
+                    MaxValueValidator(9)])
 
-    description = models.TextField(default='')
-    material_components = models.TextField(default='')
+    description = models.TextField(default='', blank=True)
+    material_components = models.TextField(default='', blank=True)
 
-    components = models.CharField(max_length=3,
-                                  default='',
-                                  choices=(('', 'None'),
-                                           ('V', 'Verbal'),
-                                           ('S', 'Somatic'),
-                                           ('M', 'Material'),
-                                           ('VS', 'VS'),
-                                           ('VM', 'VM'),
-                                           ('SM', 'SM'),
-                                           ('VSM', 'VSM')))
+    components = models.CharField(max_length=3, default='', choices=COMPONENTS)
+    school = models.CharField(max_length=256, choices=SCHOOLS)
 
-    school = models.CharField(max_length=256,
-                              choices=(('ab', 'Abjuration'),
-                                       ('cj', 'Conjuration'),
-                                       ('dv', 'Divination'),
-                                       ('en', 'Enchantment'),
-                                       ('ev', 'Evocation'),
-                                       ('il', 'Illusion'),
-                                       ('ne', 'Necromancy'),
-                                       ('tr', 'Transmutation')))
+    def get_level_display(self):
+        if self.level == 0:
+            return 'Cantrip'
+        return self.level
+
+    def __str__(self):
+        return self.name
+
+
+CASTER_CLASSES = [('bd', 'Bard'), ('cl', 'Cleric'), ('dr', 'Druid'),
+                  ('pd', 'Paladin'), ('rg', 'Ranger'), ('sc', 'Sorcerer'),
+                  ('wa', 'Warlock'), ('wi', 'Wizard')]
 
 
 class SpellClasses(models.Model):
     """ Class to contain which classes can select which spells."""
     spell = models.ForeignKey(SpellListing, on_delete=models.CASCADE)
-    caster_class = models.CharField(max_length=3,
-                                    choices=(('bd', 'Bard'),
-                                             ('cl', 'Cleric'),
-                                             ('dr', 'Druid'),
-                                             ('pd', 'Paladin'),
-                                             ('rg', 'Ranger'),
-                                             ('sc', 'Sorcerer'),
-                                             ('wa', 'Warlock'),
-                                             ('wi', 'Wizard')))
+    caster_class = models.CharField(max_length=3, choices=CASTER_CLASSES)
+
+
+@python_2_unicode_compatible
+class UserSpells(models.Model):
+    """ Class to join users to spells."""
+    player = models.ForeignKey(settings.AUTH_USER_MODEL,
+                               on_delete=models.CASCADE)
+    spell = models.ForeignKey(SpellListing, on_delete=models.CASCADE)

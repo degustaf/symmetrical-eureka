@@ -26,8 +26,13 @@ except ImportError:
     from SymmetricalEureka.backports.django_contrib_auth_mixins import\
         LoginRequiredMixin, PermissionRequiredMixin
 
-from .models import AbilityScores, Character, SpellListing
+# pylint: disable=wrong-import-order
+from rest_framework import generics
+
+from .models import (AbilityScores, CASTER_CLASSES, Character, SpellListing,
+                     SpellClasses)
 from .forms import AbilityScoresForm, CharacterForm
+from .serializers import SpellListingSerializer, SpellClassesSerializer
 
 
 # pylint: disable=too-many-ancestors
@@ -290,3 +295,26 @@ class SpellListView(ListView):
 
     def get_queryset(self):
         return SpellListing.objects.order_by('name')
+
+    def get_context_data(self, **kwargs):
+        kwargs['caster_classes'] = CASTER_CLASSES
+        return super(SpellListView, self).get_context_data(**kwargs)
+
+
+class SpellListDetail(generics.RetrieveAPIView):
+    """
+    Class for the REST API to display Spell details.
+    """
+    queryset = SpellListing.objects.all()
+    serializer_class = SpellListingSerializer
+
+
+class SpellClassesView(generics.ListAPIView):
+    """
+    Class for the REST API to display spells by class.
+    """
+    serializer_class = SpellClassesSerializer
+
+    def get_queryset(self):
+        cls = self.kwargs['cls']
+        return SpellClasses.objects.filter(caster_class__exact=cls)
