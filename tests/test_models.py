@@ -10,11 +10,12 @@ from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.db import models
+# from django.db import models
 from django.test import TestCase
 # from django.utils.html import format_html
 
-from SymmetricalEureka.models import AbilityScores, Character, SpellListing
+from SymmetricalEureka.models import (AbilityScores, Character, SpellListing,
+                                      UserProfile)
 from SymmetricalEureka.views import build_kwargs
 
 
@@ -30,7 +31,8 @@ class CharacterTest(TestCase):
         Initialize database for tests.
         """
         # pylint: disable=no-member
-        cls.test_user = User.objects.get(username="Mike")
+        test_user = User.objects.get(username="Mike")
+        cls.test_user = UserProfile.objects.get(user=test_user)
 
     def test_character_creation(self):
         """

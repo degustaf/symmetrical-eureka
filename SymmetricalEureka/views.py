@@ -30,7 +30,7 @@ except ImportError:
 from rest_framework import generics
 
 from .models import (AbilityScores, CASTER_CLASSES, Character, SpellListing,
-                     SpellClasses)
+                     SpellClasses, UserProfile)
 from .forms import AbilityScoresForm, CharacterForm
 from .serializers import SpellListingSerializer, SpellClassesSerializer
 
@@ -48,7 +48,7 @@ class PlayerLoggedIn(LoginRequiredMixin):
         Override View.get_context_data to add character_list for header.
         """
         self.character_list = Character.objects.filter(
-            player=self.request.user).order_by('character_name')
+            player__user=self.request.user).order_by('character_name')
         return super(PlayerLoggedIn, self).get_context_data(**kwargs)
 
 
@@ -120,7 +120,7 @@ class DisplayCharacterView(PlayerLoggedIn, DetailView):
         # pylint: disable=attribute-defined-outside-init
         self.player_character = Character.objects.get(
             Char_uuid=kwargs['Char_uuid'])
-        if self.player_character.player.id != request.user.id:
+        if self.player_character.player.user.id != request.user.id:
             raise PermissionDenied()
         return super(DisplayCharacterView, self).dispatch(request, *args,
                                                           **kwargs)
@@ -189,7 +189,7 @@ class CharacterAtributeView(LoginRequiredMixin, BaseDetailView):
 
     def get_object(self, queryset=None):
         character = super(CharacterAtributeView, self).get_object(queryset)
-        if character.player != self.request.user:
+        if character.player.user != self.request.user:
             raise PermissionDenied(self.get_permission_denied_message())
         # pylint: disable=unsubscriptable-object
         attr = AbilityScores.WHICH_ENG_2_KEY.get(self.kwargs['attribute'],
@@ -269,7 +269,7 @@ class NewCharacterView(PlayerLoggedIn, TemplateView):
         if character_form.is_valid() and \
                 all([af.is_valid() for af in as_forms]):
             character = character_form.save(commit=False)
-            character.player = self.request.user
+            character.player = UserProfile.objects.get(user=self.request.user)
             character.save()
 
             for as_form in as_forms:

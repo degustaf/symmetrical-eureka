@@ -13,11 +13,16 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
 
+class UserProfile(models.Model):
+    """ Class to contain non-security related user data."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE, unique=True)
+
+
 @python_2_unicode_compatible
 class Character(models.Model):
     """ Class to Hold Character Data."""
-    player = models.ForeignKey(settings.AUTH_USER_MODEL,
-                               on_delete=models.CASCADE)
+    player = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     Char_uuid = models.UUIDField(primary_key=True,
                                  default=uuid4,
                                  editable=False)
