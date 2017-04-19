@@ -12,7 +12,8 @@
 	"model": "SymmetricalEureka.UserProfile",
 	"pk": 1,
 	"fields": {
-		"user": 1
+		"user": 1,
+		"user_name": "Mike"
 	}
 }
 ]

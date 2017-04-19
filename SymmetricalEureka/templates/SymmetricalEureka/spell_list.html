@@ -85,6 +85,9 @@ var class_api_url = "{% url 'SE_spell_class' cls='' %}";
     <table id="spell_table" class="table table-hover table-condensed">
         <thead>
             <tr>
+				{% if user and not user.is_anonymous %}
+				<th></th>
+				{% endif %}
                 <th>Name</th>
                 <th>School</th>
                 <th>Level</th>
@@ -98,6 +101,9 @@ var class_api_url = "{% url 'SE_spell_class' cls='' %}";
         <tbody>
             {% for spell in object_list %}
                 <tr>
+					{% if user and not user.is_anonymous %}
+					<td class="my-spell not-selected"></td>
+					{% endif %}
                     <td class="name">{{ spell.name }}</td>
                     <td>{{ spell.get_school_display }}</td>
                     <td class="lvl">{{ spell.get_level_display }}</td>
