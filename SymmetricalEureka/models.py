@@ -18,7 +18,6 @@ class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE)
     user_name = models.CharField(max_length=256, db_index=True, unique=True)
-    # user_name = models.CharField(max_length=256, db_index=True, null=True)
     spells = models.ManyToManyField('SpellListing')
 
     def save(self, *args, **kwargs):

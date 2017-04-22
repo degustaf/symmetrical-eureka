@@ -32,7 +32,8 @@ from rest_framework import generics
 from .models import (AbilityScores, CASTER_CLASSES, Character, SpellListing,
                      SpellClasses, UserProfile)
 from .forms import AbilityScoresForm, CharacterForm
-from .serializers import SpellListingSerializer, SpellClassesSerializer
+from .serializers import (SpellListingSerializer, SpellClassesSerializer,
+                          UserSpellSerializer)
 
 
 # pylint: disable=too-many-ancestors
@@ -318,3 +319,11 @@ class SpellClassesView(generics.ListAPIView):
     def get_queryset(self):
         cls = self.kwargs['cls']
         return SpellClasses.objects.filter(caster_class__exact=cls)
+
+
+class UserSpellView(generics.UpdateAPIView):
+    """
+    Class for the REST API to handle adding/removing Speels to User.
+    """
+    queryset = UserProfile.objects.all()
+    serializer_class = UserSpellSerializer

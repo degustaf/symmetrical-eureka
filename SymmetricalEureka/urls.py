@@ -28,6 +28,7 @@ urlpatterns = [
         char_uuid_regex, attribute_regex),
         views.CharacterAtributeView.as_view(), name='SE_character_method'),
     url(r'^spells/$', views.SpellListView.as_view(), name='SE_spell_list'),
+    url(r'^api/spells/'),   # TODO how to define this API endpoint for UserSpellView????
     url(r'^spells/(?P<pk>.+)$', views.SpellListDetail.as_view(),
         name='SE_spell_detail'),
     url(r'^class/(?P<cls>.*)$', views.SpellClassesView.as_view(),
