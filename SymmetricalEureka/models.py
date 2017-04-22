@@ -13,11 +13,23 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
 
+class UserProfile(models.Model):
+    """ Class to contain non-security related user data."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE)
+    user_name = models.CharField(max_length=256, db_index=True, unique=True)
+    spells = models.ManyToManyField('SpellListing')
+
+    def save(self, *args, **kwargs):
+        if not self.user_name:
+            self.user_name = self.user.username
+        super(UserProfile, self).save(*args, **kwargs)
+
+
 @python_2_unicode_compatible
 class Character(models.Model):
     """ Class to Hold Character Data."""
-    player = models.ForeignKey(settings.AUTH_USER_MODEL,
-                               on_delete=models.CASCADE)
+    player = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     Char_uuid = models.UUIDField(primary_key=True,
                                  default=uuid4,
                                  editable=False)

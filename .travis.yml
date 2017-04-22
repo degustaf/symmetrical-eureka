@@ -16,8 +16,6 @@ matrix:
       env: TOXENV=py27-django110
     - python: 2.7
       env: TOXENV=py27-django111
-    - python: 2.7
-      env: TOXENV=py27-djangodev
     - python: 3.4
       env: TOXENV=py34-django18
     - python: 3.4
@@ -26,8 +24,6 @@ matrix:
       env: TOXENV=py34-django110
     - python: 3.4
       env: TOXENV=py34-django111
-    - python: 3.4
-      env: TOXENV=py34-djangodev
     - python: 3.5
       env: TOXENV=py35-django18
     - python: 3.5
@@ -54,8 +50,6 @@ matrix:
       env: TOXENV=pypy-django110
     - python: pypy
       env: TOXENV=pypy-django111
-    - python: pypy
-      env: TOXENV=pypy-djangodev
     - python: 3.7-dev
       env: TOXENV=pydev-django19
     - python: 3.7-dev
@@ -78,16 +72,10 @@ matrix:
       env: TOXENV=coverage
   fast_finish: true
   allow_failures:
-    - python: 2.7
-      env: TOXENV=py27-djangodev
-    - python: 3.4
-      env: TOXENV=py34-djangodev
     - python: 3.5
       env: TOXENV=py35-djangodev
     - python: 3.6
       env: TOXENV=py36-djangodev
-    - python: pypy
-      env: TOXENV=pypy-djangodev
     - python: 3.7-dev
       env: TOXENV=pydev-django19
     - python: 3.7-dev

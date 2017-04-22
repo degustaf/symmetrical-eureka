@@ -1,5 +1,5 @@
 include LICENSE
 include README.rst
+include */fixtures/*.json
 recursive-include SymmetricalEureka/static *
 recursive-include SymmetricalEureka/templates *
-recursive-include SymmetricalEureka/templatetags *

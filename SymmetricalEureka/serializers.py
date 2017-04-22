@@ -29,3 +29,19 @@ class SpellClassesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpellClasses
         fields = ('spell', )
+
+
+class UserSpellSerializer(serializers.Serializer):
+    user_name = serializers.CharField(max_length=256)
+    spell = serializers.CharField(max_length=256)
+
+    def update(self, instance, validated_data):
+        spell_name = validated_data.get('spell')
+        queryset = instance.spells.filter(name=spell_name)
+        if queryset.count() == 0:
+            spell = SpellListing.get(name=spell_name)
+            instance.spells.add(spell)
+        else:
+            instance.spells.remove(queryset[0])
+        instance.save()
+        return instance

@@ -66,9 +66,12 @@ function build_modal(data) {
 }
 
 function ajax_modal() {
-    $("tbody > tr").click(function() {
-        var name = $(this).find(".name").text();
-        $.get(api_url + encodeURI(name)).done(build_modal);
+    $("tbody > tr").click(function(evt) {
+		var cell=$(evt.target).closest('td');
+		if( cell.index()>0){
+			var name = $(this).find(".name").text();
+			$.get(api_url + encodeURI(name)).done(build_modal);
+		}
     });
     $("div.modal").click(function() {
         $("div.modal").modal('hide');

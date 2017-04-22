@@ -63,18 +63,23 @@ div.value-block > div{
 .unproficient {
     margin-bottom: 0;
 }
+
+#spell_table td.selected::after,
+#spell_table td.not-selected::after,
 .proficient::after,
 .unproficient::after {
     font-size: 24px;
     margin-bottom: 0;
 }
 
+#spell_table td.selected::after,
 .proficient::after {
-    content: "\2612";
+    content: "\25FC";
 }
 
+#spell_table td.not-selected::after,
 .unproficient::after {
-    content: "\2610";
+    content: "\25FB";
 }
 
 p.sav-score {

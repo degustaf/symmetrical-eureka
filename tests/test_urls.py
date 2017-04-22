@@ -4,11 +4,11 @@ Classes to test urls code.
 
 from uuid import uuid4
 
+from django import VERSION
 # from django.contrib.auth.models import User
 # from django.contrib.auth.views import login
 from django.core.urlresolvers import resolve, reverse
 from django.test import TestCase
-from django.contrib.auth import views as auth_views
 from social_django import views as social_views
 
 from SymmetricalEureka import views
@@ -42,7 +42,12 @@ class UrlTest(TestCase):
         Test that auth urls are included.
         """
         found = resolve(reverse('auth:logout'))
-        self.assertEqual(found.func, auth_views.logout)
+        if VERSION < (1, 11):
+            from django.contrib.auth.views import logout
+            self.assertEqual(found.func, logout)
+        else:
+            from django.contrib.auth.views import LogoutView
+            self.assertEqual(found.func.__name__, LogoutView.__name__)
 
     def test_character_urls_resolve(self):
         """
