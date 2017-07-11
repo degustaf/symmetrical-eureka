@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.db.models import base
 from django.http import (Http404, HttpResponseBadRequest, HttpResponseRedirect,
                          JsonResponse)
+from django.shortcuts import get_object_or_404
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView, View
@@ -27,13 +28,14 @@ except ImportError:
         LoginRequiredMixin, PermissionRequiredMixin
 
 # pylint: disable=wrong-import-order
-from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import authentication, generics, permissions
 
 from .models import (AbilityScores, CASTER_CLASSES, Character, SpellListing,
                      SpellClasses, UserProfile)
 from .forms import AbilityScoresForm, CharacterForm
-from .serializers import (SpellListingSerializer, SpellClassesSerializer,
-                          UserSpellSerializer)
+from .serializers import SpellListingSerializer, SpellClassesSerializer
 
 
 # pylint: disable=too-many-ancestors
@@ -299,7 +301,11 @@ class SpellListView(ListView):
 
     def get_context_data(self, **kwargs):
         kwargs['caster_classes'] = CASTER_CLASSES
-        return super(SpellListView, self).get_context_data(**kwargs)
+        profile = UserProfile.objects.get(user=self.request.user)
+        kwargs['profile'] = profile
+        kwargs['starred'] = profile.spells.all()
+        kwargs = super(SpellListView, self).get_context_data(**kwargs)
+        return kwargs
 
 
 class SpellListDetail(generics.RetrieveAPIView):
@@ -321,9 +327,27 @@ class SpellClassesView(generics.ListAPIView):
         return SpellClasses.objects.filter(caster_class__exact=cls)
 
 
-class UserSpellView(generics.UpdateAPIView):
+class UserSpellView(APIView):
     """
-    Class for the REST API to handle adding/removing Speels to User.
+    Class for the REST API to handle adding/removing Spells to User.
     """
-    queryset = UserProfile.objects.all()
-    serializer_class = UserSpellSerializer
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, pk):
+        user = request.user
+        profile = get_object_or_404(UserProfile, user=user)
+        queryset = profile.spells.filter(name=pk)
+        starred = False
+        if queryset.count() == 0:
+            spell = get_object_or_404(SpellListing, name=pk)
+            profile.spells.add(spell)
+            starred = True
+        else:
+            profile.spells.remove(queryset[0])
+
+        data = {
+            "Spell": pk,
+            "starred": starred
+        }
+        return Response(data)

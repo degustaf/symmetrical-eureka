@@ -13,17 +13,25 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
 
+@python_2_unicode_compatible
 class UserProfile(models.Model):
     """ Class to contain non-security related user data."""
-    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, db_index=True,
                                 on_delete=models.CASCADE)
-    user_name = models.CharField(max_length=256, db_index=True, unique=True)
-    spells = models.ManyToManyField('SpellListing')
+    user_name = models.CharField(max_length=256, unique=True)
+    spells = models.ManyToManyField('SpellListing', blank=True)
 
-    def save(self, *args, **kwargs):
-        if not self.user_name:
-            self.user_name = self.user.username
-        super(UserProfile, self).save(*args, **kwargs)
+    def __str__(self):
+        return self.user_name
+
+
+def user_profile_pipeline(**kwargs):
+    user = kwargs['user']
+    profile = UserProfile.objects.all().filter(user=user)
+    if not profile:
+        profile = UserProfile(user=user)
+        profile.user_name = user.get_username()
+        profile.save()
 
 
 @python_2_unicode_compatible

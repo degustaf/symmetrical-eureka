@@ -1,5 +1,5 @@
 /*jslint browser: true*/
-/*global $, document, api_url, class_api_url*/
+/*global $, document, api_url, class_api_url, userspell_url, get_csrf_token*/
 
 var filters = {};
 
@@ -46,6 +46,17 @@ function combine_school_level(level, school, ritual) {
     return ret;
 }
 
+function userspell_callback(cell) {
+	return function (data) {
+		var star = cell.children("span.glyphicon");
+		if(data.starred) {
+			star.removeClass("glyphicon-star-empty").addClass("glyphicon-star");
+		} else {
+			star.removeClass("glyphicon-star").addClass("glyphicon-star-empty");
+		}
+	};
+}
+
 function build_modal(data) {
     $("#ModalTitle").text(data.name);
     $("#school").text(combine_school_level(data.level, data.school, data.ritual));
@@ -68,8 +79,11 @@ function build_modal(data) {
 function ajax_modal() {
     $("tbody > tr").click(function(evt) {
 		var cell=$(evt.target).closest('td');
-		if( cell.index()>0){
-			var name = $(this).find(".name").text();
+		var name = $(this).find(".name").text();
+		if( cell.index()===0){
+			var post_data = {'csrfmiddlewaretoken': get_csrf_token()};
+			$.post(userspell_url + encodeURI(name), post_data).done(userspell_callback(cell));
+		}else{
 			$.get(api_url + encodeURI(name)).done(build_modal);
 		}
     });
@@ -82,15 +96,36 @@ function apply_filters() {
     $("#spell_table > tbody > tr").each(function() {
         var name = $(this).find(".name").text();
         var lvl = $(this).find(".lvl").text();
+		var starred = $(this).find(".my-spell > span").hasClass("glyphicon-star");
         if((filters.cls === undefined ||
             filters.cls.spells[name] !== undefined) &&
            (filters.lvl === undefined ||
-            filters.lvl === lvl)) {
+            filters.lvl === lvl) &&
+		   (filters.starred === undefined ||
+			(filters.starred ? starred : !starred ))) {
             $(this).removeClass("hidden");
         } else {
             $(this).addClass("hidden");
         }
     });
+}
+
+function filter_starred() {
+	$("a.starred_filter").click(function() {
+		var re = /starred_filter_(.*)$/;
+		var id = $(this).prop('id');
+		var starred = id.match(re)[1];
+		if( starred === "any" ) {
+			$("#active_starred").text("Starred");
+			if(filters.hasOwnProperty('starred')) {
+				delete filters.starred;
+			}
+		} else {
+            $("#active_starred").text($("#"+id).text());
+            filters.starred = (starred === "Yes");
+		}
+		apply_filters();
+	});
 }
 
 function filter_classes() {
@@ -141,4 +176,5 @@ $(document).ready(function() {
     ajax_modal();
     filter_classes();
     filter_levels();
+	filter_starred();
 } );
