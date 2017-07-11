@@ -1,14 +1,12 @@
-"""
-Classes to test urls code.
-"""
+# pylint: disable=missing-docstring
 
 from uuid import uuid4
 
+from django import VERSION
 # from django.contrib.auth.models import User
 # from django.contrib.auth.views import login
 from django.core.urlresolvers import resolve, reverse
 from django.test import TestCase
-from django.contrib.auth import views as auth_views
 from social_django import views as social_views
 
 from SymmetricalEureka import views
@@ -19,43 +17,54 @@ from SymmetricalEureka import views
 
 
 class UrlTest(TestCase):
-    """
-    Class of tests for the urls
-    """
 
     def test_home_url_resolves(self):
-        """
-        Test that index resolves.
-        """
         found = resolve(reverse('SE_home'))
         self.assertEqual(found.func.__name__, views.HomeView.__name__)
 
     def test_social_urls_resolve(self):
-        """
-        Test that social urls are included.
-        """
         found = resolve(reverse('social:begin', kwargs={'backend': 'TEST'}))
         self.assertEqual(found.func, social_views.auth)
 
     def test_auth_urls_resolve(self):
-        """
-        Test that auth urls are included.
-        """
         found = resolve(reverse('auth:logout'))
-        self.assertEqual(found.func, auth_views.logout)
+        if VERSION < (1, 11):
+            from django.contrib.auth.views import logout
+            self.assertEqual(found.func, logout)
+        else:
+            from django.contrib.auth.views import LogoutView
+            self.assertEqual(found.func.__name__, LogoutView.__name__)
 
     def test_character_urls_resolve(self):
-        """
-        Test that Character urls are included.
-        """
         found = resolve(reverse('SE_character',
                                 kwargs={'Char_uuid': uuid4()}))
         self.assertEqual(found.func.__name__,
                          views.DisplayCharacterView.__name__)
 
     def test_new_character_url_resolves(self):
-        """
-        Test that new character url resolves.
-        """
         found = resolve(reverse('new_character'))
         self.assertEqual(found.func.__name__, views.NewCharacterView.__name__)
+
+    def test_spell_list_url_resolves(self):
+        found = resolve(reverse('SE_spell_list'))
+        self.assertEqual(found.func.__name__, views.SpellListView.__name__)
+
+    def test_login_page_resolves(self):
+        found = resolve(reverse('SE_login'))
+        self.assertEqual(found.func.__name__, views.LoginView.__name__)
+
+    def test_user_spell_resolves(self):
+        found = resolve(reverse('UserSpell', kwargs={'pk': 'Aid'}))
+        self.assertEqual(found.func.__name__, views.UserSpellView.__name__)
+
+    def test_empty_user_spell_resolves(self):
+        found = resolve(reverse('UserSpell', kwargs={'pk': ''}))
+        self.assertEqual(found.func.__name__, views.UserSpellView.__name__)
+
+    def test_spell_class_resolves(self):
+        found = resolve(reverse('SE_spell_class', kwargs={'cls': 'pd'}))
+        self.assertEqual(found.func.__name__, views.SpellClassesView.__name__)
+
+    def test_empty_spell_class_resolves(self):
+        found = resolve(reverse('SE_spell_class', kwargs={'cls': ''}))
+        self.assertEqual(found.func.__name__, views.SpellClassesView.__name__)

@@ -16,7 +16,7 @@ from django.test import TestCase, Client
 
 from six import exec_
 
-from SymmetricalEureka.models import AbilityScores, Character
+from SymmetricalEureka.models import AbilityScores, Character, UserProfile
 from SymmetricalEureka.views import ClassMethodView
 
 
@@ -32,14 +32,14 @@ class OneUserGeneric(TestCase):
         Initialize database for tests.
         """
         # pylint: disable=no-member
-        cls.test_user = User.objects.get(username="Mike")
+        cls.test_user = UserProfile.objects.get(user__username="Mike")
 
     def setUp(self):
         """
         Log user in.
         """
         try:
-            self.client.force_login(self.test_user)
+            self.client.force_login(self.test_user.user)
         except AttributeError:
             # For Django 1.8
             self.client.login(username="Mike", password="password")
@@ -319,7 +319,7 @@ class JsonCharacterViewsTest(UserWithCharacterGeneric):
         """
         csrf_client = Client(enforce_csrf_checks=True)
         try:
-            csrf_client.force_login(self.test_user)
+            csrf_client.force_login(self.test_user.user)
         except AttributeError:
             # For Django 1.8
             csrf_client.login(username="Mike", password="password")

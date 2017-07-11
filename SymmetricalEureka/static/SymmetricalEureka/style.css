@@ -63,6 +63,7 @@ div.value-block > div{
 .unproficient {
     margin-bottom: 0;
 }
+
 .proficient::after,
 .unproficient::after {
     font-size: 24px;
@@ -70,11 +71,11 @@ div.value-block > div{
 }
 
 .proficient::after {
-    content: "\2612";
+    content: "\25FC";
 }
 
 .unproficient::after {
-    content: "\2610";
+    content: "\25FB";
 }
 
 p.sav-score {

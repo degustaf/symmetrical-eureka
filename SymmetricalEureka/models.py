@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=missing-docstring
 """
 Django Models
 """
@@ -13,10 +14,30 @@ from django.utils.encoding import python_2_unicode_compatible
 
 
 @python_2_unicode_compatible
+class UserProfile(models.Model):
+    """ Class to contain non-security related user data."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, db_index=True,
+                                on_delete=models.CASCADE)
+    user_name = models.CharField(max_length=256, unique=True)
+    spells = models.ManyToManyField('SpellListing', blank=True)
+
+    def __str__(self):
+        return self.user_name
+
+
+def user_profile_pipeline(**kwargs):
+    user = kwargs['user']
+    profile = UserProfile.objects.all().filter(user=user)
+    if not profile:
+        profile = UserProfile(user=user)
+        profile.user_name = user.get_username()
+        profile.save()
+
+
+@python_2_unicode_compatible
 class Character(models.Model):
     """ Class to Hold Character Data."""
-    player = models.ForeignKey(settings.AUTH_USER_MODEL,
-                               on_delete=models.CASCADE)
+    player = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     Char_uuid = models.UUIDField(primary_key=True,
                                  default=uuid4,
                                  editable=False)
@@ -96,3 +117,56 @@ class AbilityScores(models.Model):
         if proficient and proficient != 'false':
             return mod + 2
         return mod
+
+
+COMPONENTS = [('', 'None'), ('V', 'Verbal'), ('S', 'Somatic'),
+              ('M', 'Material'), ('VS', 'Verbal, Somatic'),
+              ('VM', 'Verbal, Material'), ('SM', 'Somatic, Material'),
+              ('VSM', 'Verbal, Somatic, Material')]
+
+SCHOOLS = [('ab', 'Abjuration'), ('cj', 'Conjuration'), ('dv', 'Divination'),
+           ('en', 'Enchantment'), ('ev', 'Evocation'), ('il', 'Illusion'),
+           ('ne', 'Necromancy'), ('tr', 'Transmutation')]
+
+
+@python_2_unicode_compatible
+class SpellListing(models.Model):
+    """ Class of Spell listing."""
+    name = models.CharField(max_length=256, primary_key=True)
+    page = models.CharField(max_length=10, default='')
+    spell_range = models.CharField(max_length=256, default='')
+    duration = models.CharField(max_length=256, default='')
+    casting_time = models.CharField(max_length=256, default='')
+
+    concentration = models.BooleanField(default=False)
+    ritual = models.BooleanField(default=False)
+
+    level = models.PositiveSmallIntegerField(
+        default=0,
+        validators=[MinValueValidator(0),
+                    MaxValueValidator(9)])
+
+    description = models.TextField(default='', blank=True)
+    material_components = models.TextField(default='', blank=True)
+
+    components = models.CharField(max_length=3, default='', choices=COMPONENTS)
+    school = models.CharField(max_length=256, choices=SCHOOLS)
+
+    def get_level_display(self):
+        if self.level == 0:
+            return 'Cantrip'
+        return self.level
+
+    def __str__(self):
+        return self.name
+
+
+CASTER_CLASSES = [('bd', 'Bard'), ('cl', 'Cleric'), ('dr', 'Druid'),
+                  ('pd', 'Paladin'), ('rg', 'Ranger'), ('sc', 'Sorcerer'),
+                  ('wa', 'Warlock'), ('wi', 'Wizard')]
+
+
+class SpellClasses(models.Model):
+    """ Class to contain which classes can select which spells."""
+    spell = models.ForeignKey(SpellListing, on_delete=models.CASCADE)
+    caster_class = models.CharField(max_length=3, choices=CASTER_CLASSES)

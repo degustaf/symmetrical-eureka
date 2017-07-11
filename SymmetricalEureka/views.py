@@ -14,8 +14,9 @@ from django.core.urlresolvers import reverse_lazy
 from django.db.models import base
 from django.http import (Http404, HttpResponseBadRequest, HttpResponseRedirect,
                          JsonResponse)
+from django.shortcuts import get_object_or_404
 from django.utils.datastructures import MultiValueDictKeyError
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView, View
 from django.views.generic.detail import BaseDetailView
 
@@ -26,8 +27,15 @@ except ImportError:
     from SymmetricalEureka.backports.django_contrib_auth_mixins import\
         LoginRequiredMixin, PermissionRequiredMixin
 
-from .models import AbilityScores, Character
+# pylint: disable=wrong-import-order
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import authentication, generics, permissions
+
+from .models import (AbilityScores, CASTER_CLASSES, Character, SpellListing,
+                     SpellClasses, UserProfile)
 from .forms import AbilityScoresForm, CharacterForm
+from .serializers import SpellListingSerializer, SpellClassesSerializer
 
 
 # pylint: disable=too-many-ancestors
@@ -43,7 +51,7 @@ class PlayerLoggedIn(LoginRequiredMixin):
         Override View.get_context_data to add character_list for header.
         """
         self.character_list = Character.objects.filter(
-            player=self.request.user).order_by('character_name')
+            player__user=self.request.user).order_by('character_name')
         return super(PlayerLoggedIn, self).get_context_data(**kwargs)
 
 
@@ -115,7 +123,7 @@ class DisplayCharacterView(PlayerLoggedIn, DetailView):
         # pylint: disable=attribute-defined-outside-init
         self.player_character = Character.objects.get(
             Char_uuid=kwargs['Char_uuid'])
-        if self.player_character.player.id != request.user.id:
+        if self.player_character.player.user.id != request.user.id:
             raise PermissionDenied()
         return super(DisplayCharacterView, self).dispatch(request, *args,
                                                           **kwargs)
@@ -184,7 +192,7 @@ class CharacterAtributeView(LoginRequiredMixin, BaseDetailView):
 
     def get_object(self, queryset=None):
         character = super(CharacterAtributeView, self).get_object(queryset)
-        if character.player != self.request.user:
+        if character.player.user != self.request.user:
             raise PermissionDenied(self.get_permission_denied_message())
         # pylint: disable=unsubscriptable-object
         attr = AbilityScores.WHICH_ENG_2_KEY.get(self.kwargs['attribute'],
@@ -264,7 +272,7 @@ class NewCharacterView(PlayerLoggedIn, TemplateView):
         if character_form.is_valid() and \
                 all([af.is_valid() for af in as_forms]):
             character = character_form.save(commit=False)
-            character.player = self.request.user
+            character.player = UserProfile.objects.get(user=self.request.user)
             character.save()
 
             for as_form in as_forms:
@@ -278,3 +286,68 @@ class NewCharacterView(PlayerLoggedIn, TemplateView):
         else:
             return self.render_to_response(self.get_context_data(
                 character_form=character_form, as_forms=as_forms))
+
+
+class SpellListView(ListView):
+    """
+    Class for the view to display Spells.
+    """
+
+    model = SpellListing
+    template_name = 'SymmetricalEureka/spell_list.html'
+
+    def get_queryset(self):
+        return SpellListing.objects.order_by('name')
+
+    def get_context_data(self, **kwargs):
+        kwargs['caster_classes'] = CASTER_CLASSES
+        profile = UserProfile.objects.get(user=self.request.user)
+        kwargs['profile'] = profile
+        kwargs['starred'] = profile.spells.all()
+        kwargs = super(SpellListView, self).get_context_data(**kwargs)
+        return kwargs
+
+
+class SpellListDetail(generics.RetrieveAPIView):
+    """
+    Class for the REST API to display Spell details.
+    """
+    queryset = SpellListing.objects.all()
+    serializer_class = SpellListingSerializer
+
+
+class SpellClassesView(generics.ListAPIView):
+    """
+    Class for the REST API to display spells by class.
+    """
+    serializer_class = SpellClassesSerializer
+
+    def get_queryset(self):
+        cls = self.kwargs['cls']
+        return SpellClasses.objects.filter(caster_class__exact=cls)
+
+
+class UserSpellView(APIView):
+    """
+    Class for the REST API to handle adding/removing Spells to User.
+    """
+    authentication_classes = (authentication.SessionAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, pk):
+        user = request.user
+        profile = get_object_or_404(UserProfile, user=user)
+        queryset = profile.spells.filter(name=pk)
+        starred = False
+        if queryset.count() == 0:
+            spell = get_object_or_404(SpellListing, name=pk)
+            profile.spells.add(spell)
+            starred = True
+        else:
+            profile.spells.remove(queryset[0])
+
+        data = {
+            "Spell": pk,
+            "starred": starred
+        }
+        return Response(data)

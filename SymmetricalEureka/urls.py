@@ -27,6 +27,13 @@ urlpatterns = [
     url(r'^api/(?P<Char_uuid>{})/AbilityScores/(?P<attribute>{})$'.format(
         char_uuid_regex, attribute_regex),
         views.CharacterAtributeView.as_view(), name='SE_character_method'),
+    url(r'^spells/$', views.SpellListView.as_view(), name='SE_spell_list'),
+    url(r'^api/spells/(?P<pk>.*)', views.UserSpellView.as_view(),
+        name='UserSpell'),
+    url(r'^spells/(?P<pk>.+)$', views.SpellListDetail.as_view(),
+        name='SE_spell_detail'),
+    url(r'^class/(?P<cls>.*)$', views.SpellClassesView.as_view(),
+        name='SE_spell_class'),
     url('', include(social_urls, namespace='social')),
     url('', include(auth_urls, namespace='auth')),
 ]
